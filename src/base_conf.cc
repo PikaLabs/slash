@@ -169,9 +169,10 @@ bool BaseConf::SetConfBool(const std::string &name, const bool value)
 
 void BaseConf::DumpConf() const
 {
+  int cnt = 1;
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == kConf) {
-      printf("%s %s\n", item_[i].name.c_str(), item_[i].value.c_str());
+      printf("%2d %s %s\n", cnt++, item_[i].name.c_str(), item_[i].value.c_str());
     }
   }
 }
@@ -179,21 +180,20 @@ void BaseConf::DumpConf() const
 bool BaseConf::WriteBack()
 {
   WritableFile *write_file;
-  int ret = NewWritableFile(path_ + ".tmp", &write_file);
+  std::string tmp_path = path_ + ".tmp";
+  int ret = NewWritableFile(tmp_path, &write_file);
   log_info("ret %d", ret);
   std::string tmp;
   for (int i = 0; i < item_.size(); i++) {
-    if (item_[i].type == kComment) {
-      tmp = item_[i].value;
-    } else {
+    if (item_[i].type == kConf) {
       tmp = item_[i].name + " : " + item_[i].value + "\n";
+      write_file->Append(tmp.c_str(), tmp.length());
+    } else {
+      write_file->Append();
     }
-    log_info("Write tmp %s", tmp.c_str());
-    write_file->Append(tmp.c_str(), tmp.length());
   }
   write_file->Close();
-  RenameFile(path_ + ".tmp", path_);
+  RenameFile(tmp_path, path_);
 
 }
-
 }
