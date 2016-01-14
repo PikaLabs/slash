@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 #include <algorithm>
 #include "env.h"
+#include "xdebug.h"
 
 namespace slash {
 
@@ -26,19 +27,26 @@ int BaseConf::LoadConf()
   // read conf items
   
   char line[CONF_ITEM_LEN];
+  char name[CONF_ITEM_LEN], value[CONF_ITEM_LEN];
   int line_len = 0;
-  std::string name, value;
-  char *ptr;
+  int name_len = 0, value_len = 0;
   int sep_sign = 0;
+  ConfType type = kConf;
 
   while (sequential_file->ReadLine(line, CONF_ITEM_LEN) != NULL) {
     sep_sign = 0;
+    name_len = 0;
+    value_len = 0;
+    type = kComment;
     line_len = strlen(line);
     for (int i = 0; i < line_len; i++) {
-      switch (line[i]) {
-      case NUMBER:
+      if (line[i] == NUMBER) {
+        type = kComment;
         break;
+      }
+      switch (line[i]) {
       case COLON: 
+        type = kConf;
         sep_sign = 1;
       case SPACE:
         continue;
@@ -48,15 +56,15 @@ int BaseConf::LoadConf()
         continue;
       default:
         if (sep_sign == 0) {
-          name += line[i];
+          name[name_len++] = line[i];
         } else {
-          value += line[i];
+          value[value_len++] = line[i];
         }
       }
     }
 
-    if (sep_sign == 1) {
-      item_.push_back(ConfItem(kConf, name, value));
+    if (type == kConf) {
+      item_.push_back(ConfItem(kConf, std::string(name, name_len), std::string(value, value_len)));
     } else {
       item_.push_back(ConfItem(kComment, std::string(line, line_len)));
     }
@@ -120,9 +128,39 @@ bool BaseConf::SetConfInt(const std::string &name, const int value)
       continue;
     }
     if (name == item_[i].name) {
-      char buf[128];
-      snprintf(buf, sizeof(buf), "%d", value);
-      item_[i].value = std::string(buf, sizeof(buf));
+      item_[i].value = std::to_string(value);
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BaseConf::SetConfStr(const std::string &name, const std::string &value)
+{
+  for (int i = 0; i < item_.size(); i++) {
+    if (item_[i].type == kComment) {
+      continue;
+    }
+    if (name == item_[i].name) {
+      item_[i].value = value;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BaseConf::SetConfBool(const std::string &name, const bool value)
+{
+  for (int i = 0; i < item_.size(); i++) {
+    if (item_[i].type == kComment) {
+      continue;
+    }
+    if (name == item_[i].name) {
+      if (value == true) {
+        item_[i].value = "true";
+      } else {
+        item_[i].value = "false";
+      }
       return true;
     }
   }
@@ -132,24 +170,29 @@ bool BaseConf::SetConfInt(const std::string &name, const int value)
 void BaseConf::DumpConf() const
 {
   for (int i = 0; i < item_.size(); i++) {
-    printf("%2d %s %s\n", i + 1, item_[i].name.c_str(), item_[i].value.c_str());
+    if (item_[i].type == kConf) {
+      printf("%s %s\n", item_[i].name.c_str(), item_[i].value.c_str());
+    }
   }
 }
 
 bool BaseConf::WriteBack()
 {
   WritableFile *write_file;
-  NewWritableFile(path_ + ".tmp", &write_file);
+  int ret = NewWritableFile(path_ + ".tmp", &write_file);
+  log_info("ret %d", ret);
   std::string tmp;
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == kComment) {
-      tmp = item_[i].value + "\n";
+      tmp = item_[i].value;
     } else {
       tmp = item_[i].name + " : " + item_[i].value + "\n";
     }
+    log_info("Write tmp %s", tmp.c_str());
     write_file->Append(tmp.c_str(), tmp.length());
   }
   write_file->Close();
+  RenameFile(path_ + ".tmp", path_);
 
 }
 

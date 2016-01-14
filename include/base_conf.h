@@ -25,8 +25,8 @@ public:
   bool GetConfBool(const std::string &name, bool* value) const;
 
   bool SetConfInt(const std::string &name, const int value);
-  bool SetConfStr(const std::string &name, const int value);
-  bool SetConfBool(const std::string &name, const int value);
+  bool SetConfStr(const std::string &name, const std::string &value);
+  bool SetConfBool(const std::string &name, const bool value);
 
   void DumpConf() const;
   bool WriteBack();

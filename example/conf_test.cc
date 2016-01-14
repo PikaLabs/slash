@@ -13,11 +13,9 @@ int main()
     log_info("LoodConf error");
   }
 
-  b.DumpConf();
+  b.SetConfInt("port", 99999);
   b.WriteBack();
-
-  
-
+  b.DumpConf();
 
   return 0;
 }

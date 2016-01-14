@@ -39,6 +39,11 @@ int GetChildren(const std::string& dir, std::vector<std::string>& result)
   return res;
 }
 
+int RenameFile(const std::string& oldname, const std::string& newname)
+{
+  return rename(oldname.c_str(), newname.c_str());
+}
+
 WritableFile::WritableFile()
 {
 
@@ -98,7 +103,6 @@ private:
 
 int NewWritableFile(const std::string& fname, WritableFile** result) 
 {
-  int ret;
   FILE *f = fopen(fname.c_str(), "a");
   if (f == NULL) {
     *result = NULL;
@@ -107,7 +111,6 @@ int NewWritableFile(const std::string& fname, WritableFile** result)
     *result = new PosixWritableFile(fname, f);
     return 0;
   }
-  return ret;
 }
 
 SequentialFile::~SequentialFile()

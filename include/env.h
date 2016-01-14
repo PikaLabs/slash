@@ -24,6 +24,8 @@ int GetChildren(const std::string& dir, std::vector<std::string>& result);
 
 int NewWritableFile(const std::string& fname, WritableFile** result);
 
+int RenameFile(const std::string& oldname, const std::string& newname);
+
 class WritableFile 
 {
 public:
