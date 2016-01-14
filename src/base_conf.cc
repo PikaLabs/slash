@@ -189,7 +189,7 @@ bool BaseConf::WriteBack()
       tmp = item_[i].name + " : " + item_[i].value + "\n";
       write_file->Append(tmp.c_str(), tmp.length());
     } else {
-      write_file->Append();
+      write_file->Append(item_[i].value.c_str(), item_[i].value.length());
     }
   }
   write_file->Close();

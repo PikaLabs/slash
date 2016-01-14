@@ -14,7 +14,7 @@ int main()
   }
 
   b.SetConfInt("port", 99999);
-  // b.SetConfStr("pidfile", "./anan.pid");
+  b.SetConfStr("pidfile", "./anan.pid");
   b.WriteBack();
   b.DumpConf();
 
