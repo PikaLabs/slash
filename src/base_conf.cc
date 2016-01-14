@@ -113,6 +113,22 @@ bool BaseConf::GetConfBool(const std::string &name, bool* value) const
   return false;
 }
 
+bool BaseConf::SetConfInt(const std::string &name, const int value)
+{
+  for (int i = 0; i < item_.size(); i++) {
+    if (item_[i].type == kComment) {
+      continue;
+    }
+    if (name == item_[i].name) {
+      char buf[128];
+      snprintf(buf, sizeof(buf), "%d", value);
+      item_[i].value = std::string(buf, sizeof(buf));
+      return true;
+    }
+  }
+  return false;
+}
+
 void BaseConf::DumpConf() const
 {
   for (int i = 0; i < item_.size(); i++) {

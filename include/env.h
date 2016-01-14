@@ -52,7 +52,7 @@ public:
   virtual int Read(size_t n, char *&result, char *scratch) = 0;
   virtual int Skip(uint64_t n) = 0;
   virtual int Close() = 0;
-  virtual char *ReadLine(char *buf, int n);
+  virtual char *ReadLine(char *buf, int n) = 0;
 };
 
 }

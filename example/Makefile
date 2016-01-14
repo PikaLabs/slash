@@ -5,7 +5,7 @@ else
 	CXXFLAGS = -O2 -pipe -fPIC -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
 	# CXXFLAGS = -Wall -W -DDEBUG -g -O0 -D__XDEBUG__ 
 endif
-OBJECT = conf
+OBJECT = conf_test
 SRC_DIR = ./
 OUTPUT = ./output
 
@@ -35,7 +35,7 @@ all: $(OBJECT)
 	@echo "Success, go, go, go..."
 
 
-holy: conf_test.cc
+conf_test: conf_test.cc
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
 
 $(OBJS): %.o : %.cc
