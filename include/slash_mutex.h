@@ -54,7 +54,6 @@ private:
 
 typedef pthread_once_t OnceType;
 extern void InitOnce(OnceType* once, void (*initializer)());
-}
 
 class RWLock {
   public:
@@ -74,4 +73,7 @@ class RWLock {
     RWLock(const RWLock&);
     void operator=(const RWLock&);
 };
+
+}
+
 #endif
