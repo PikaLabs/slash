@@ -1,7 +1,8 @@
-#include "base_conf.h"
-#include "sys/stat.h"
 #include <glog/logging.h>
 #include <algorithm>
+#include <sys/stat.h>
+
+#include "base_conf.h"
 #include "env.h"
 #include "xdebug.h"
 
@@ -70,7 +71,8 @@ int BaseConf::LoadConf()
     }
   }
 
-  sequential_file->Close();
+  //sequential_file->Close();
+  delete sequential_file;
   return 0;
 }
 
@@ -181,19 +183,22 @@ bool BaseConf::WriteBack()
 {
   WritableFile *write_file;
   std::string tmp_path = path_ + ".tmp";
-  int ret = NewWritableFile(tmp_path, &write_file);
-  log_info("ret %d", ret);
+  Status ret = NewWritableFile(tmp_path, &write_file);
+  log_info("ret %s", ret.ToString().c_str());
   std::string tmp;
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == kConf) {
       tmp = item_[i].name + " : " + item_[i].value + "\n";
-      write_file->Append(tmp.c_str(), tmp.length());
+      write_file->Append(tmp);
+      //write_file->Append(tmp.c_str(), tmp.length());
     } else {
-      write_file->Append(item_[i].value.c_str(), item_[i].value.length());
+      write_file->Append(item_[i].value);
     }
   }
   write_file->Close();
   RenameFile(tmp_path, path_);
 
 }
-}
+
+
+}   // namespace slash
