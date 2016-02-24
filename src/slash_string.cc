@@ -48,9 +48,11 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <dirent.h>
+#include <algorithm>
 
 #include "slash_string.h"
 
+namespace slash {
 
 /* Glob-style pattern matching. */
 int stringmatchlen(const char *pattern, int patternLen,
@@ -500,7 +502,7 @@ void getRandomHexChars(char *p, unsigned int len) {
     if (fp) fclose(fp);
 }
 
-std::vector<std::string>& PStringSplit(const std::string &s, 
+std::vector<std::string>& StringSplit(const std::string &s,
         char delim, std::vector<std::string> &elems) { 
     elems.clear();
     std::stringstream ss(s);
@@ -512,7 +514,7 @@ std::vector<std::string>& PStringSplit(const std::string &s,
     return elems;
 }
 
-std::string PStringConcat(const std::vector<std::string> &elems, char delim) {
+std::string StringConcat(const std::vector<std::string> &elems, char delim) {
     std::string result;
     std::vector<std::string>::const_iterator it = elems.begin();
     while (it != elems.end()) {
@@ -524,6 +526,11 @@ std::string PStringConcat(const std::vector<std::string> &elems, char delim) {
         result.resize(result.size() - 1);
     }
     return result;
+}
+
+std::string& StringToLower(std::string& ori) {
+  std::transform(ori.begin(), ori.end(), ori.begin(), ::tolower);
+  return ori;
 }
 
 
@@ -639,5 +646,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+
 #endif
+}
 
