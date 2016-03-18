@@ -24,6 +24,9 @@ static const size_t kPageSize = getpagesize();
 /*
  * File Operations
  */
+int IsDir(const std::string& path);
+int DeleteDir(const std::string& path);
+bool DeleteDirIfExist(const std::string& path);
 int CreateDir(const std::string& path);
 
 /*

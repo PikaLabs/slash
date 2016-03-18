@@ -66,16 +66,81 @@ int RenameFile(const std::string& oldname, const std::string& newname) {
   return rename(oldname.c_str(), newname.c_str());
 }
 
+int IsDir(const std::string& path) {
+  struct stat buf;
+  int ret = stat(path.c_str(), &buf);
+  if (0 == ret) {
+    if (buf.st_mode & S_IFDIR) {
+      //folder
+      return 0;
+    } else {
+      //file
+      return 1;
+    }
+  }
+  return -1;
+}
+
+int DeleteDir(const std::string& path)
+{
+  char chBuf[256];
+  DIR * dir = NULL;
+  struct dirent *ptr;
+  int ret = 0;
+  dir = opendir(path.c_str());
+  if (NULL == dir) {
+    return -1;
+  }
+  while((ptr = readdir(dir)) != NULL) {
+    ret = strcmp(ptr->d_name, ".");
+    if (0 == ret) {
+      continue;
+    }
+    ret = strcmp(ptr->d_name, "..");
+    if (0 == ret) {
+      continue;
+    }
+    snprintf(chBuf, 256, "%s/%s", path.c_str(), ptr->d_name);
+    ret = IsDir(chBuf);
+    if (0 == ret) {
+      //is dir
+      ret = DeleteDir(chBuf);
+      if (0 != ret) {
+        return -1;
+      }
+    }
+    else if (1 == ret) {
+      //is file
+      ret = remove(chBuf);
+      if(0 != ret) {
+        return -1;
+      }
+    }
+  }
+  (void)closedir(dir);
+  ret = remove(path.c_str());
+  if (0 != ret) {
+    return -1;
+  }
+  return 0;
+}
+
+bool DeleteDirIfExist(const std::string& path) {
+  if (IsDir(path) == 0 && DeleteDir(path) != 0) {
+    return false;
+  }
+  return true;
+}
 
 SequentialFile::~SequentialFile() {
 }
 
 class PosixSequentialFile: public SequentialFile {
- private:
+private:
   std::string filename_;
   FILE* file_;
 
- public:
+public:
   virtual void setUnBuffer() {
     setbuf(file_, NULL);
   }
