@@ -132,6 +132,37 @@ bool DeleteDirIfExist(const std::string& path) {
   return true;
 }
 
+uint64_t Du(const std::string& filename) {
+	struct stat statbuf;
+	uint64_t sum;
+  if (lstat(filename.c_str(), &statbuf) != 0) {
+		return 0;
+	}
+	if (S_ISLNK(statbuf.st_mode) && stat(filename.c_str(), &statbuf) != 0) {
+	  return 0;
+	}
+  sum = statbuf.st_size;
+	if (S_ISDIR(statbuf.st_mode)) {
+		DIR *dir = NULL;
+		struct dirent *entry;
+		std::string newfile;
+
+		dir = opendir(filename.c_str());
+		if (!dir) {
+			return sum;
+		}
+		while ((entry = readdir(dir))) {
+			if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0) {
+				continue;
+      }
+			newfile = filename + "/" + entry->d_name;
+			sum += Du(newfile);
+		}
+		closedir(dir);
+	}
+	return sum;
+}
+
 SequentialFile::~SequentialFile() {
 }
 
