@@ -43,6 +43,9 @@ int RenameFile(const std::string& oldname, const std::string& newname);
 int GetChildren(const std::string& dir, std::vector<std::string>& result);
 
 
+uint64_t NowMicros();
+void SleepForMicroseconds(int micros);
+
 Status NewSequentialFile(const std::string& fname, SequentialFile** result);
 
 Status NewWritableFile(const std::string& fname, WritableFile** result);

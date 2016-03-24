@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 
 #include "xdebug.h"
 
@@ -16,7 +17,7 @@ namespace slash {
 /*
  * size of initial mmap size
  */
-static size_t kMmapBoundSize = 1024 * 1024 * 4;
+size_t kMmapBoundSize = 1024 * 1024 * 4;
 
 void SetMmapBoundSize(size_t size) {
   kMmapBoundSize = size;
@@ -161,6 +162,16 @@ uint64_t Du(const std::string& filename) {
 		closedir(dir);
 	}
 	return sum;
+}
+
+uint64_t NowMicros() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return static_cast<uint64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
+}
+
+void SleepForMicroseconds(int micros) {
+  usleep(micros);
 }
 
 SequentialFile::~SequentialFile() {
@@ -504,6 +515,5 @@ Status AppendWritableFile(const std::string& fname, WritableFile** result, uint6
   }
   return s;
 }
-
 
 }   // namespace slash
