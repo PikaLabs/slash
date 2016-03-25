@@ -197,7 +197,6 @@ bool BaseConf::WriteBack()
   }
   write_file->Close();
   RenameFile(tmp_path, path_);
-
 }
 
 

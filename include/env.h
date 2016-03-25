@@ -28,6 +28,7 @@ int IsDir(const std::string& path);
 int DeleteDir(const std::string& path);
 bool DeleteDirIfExist(const std::string& path);
 int CreateDir(const std::string& path);
+int CreatePath(const std::string& path, mode_t mode = 0755);
 uint64_t Du(const std::string& path);
 
 /*

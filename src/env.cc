@@ -24,7 +24,7 @@ void SetMmapBoundSize(size_t size) {
 }
 
 static Status IOError(const std::string& context, int err_number) {
-    return Status::IOError(context, strerror(err_number));
+  return Status::IOError(context, strerror(err_number));
 }
 
 int CreateDir(const std::string& path) {
@@ -46,7 +46,53 @@ Status DeleteFile(const std::string& fname) {
     result = IOError(fname, errno);
   }
   return result;
-};
+}
+
+int DoCreatePath(const char *path, mode_t mode) {
+  struct stat st;
+  int status = 0;
+
+  if (stat(path, &st) != 0) {
+    /* Directory does not exist. EEXIST for race
+     * condition */
+    if (mkdir(path, mode) != 0 && errno != EEXIST)
+      status = -1;
+  } else if (!S_ISDIR(st.st_mode)) {
+    errno = ENOTDIR;
+    status = -1;
+  }
+
+  return (status);
+}
+
+/**
+ ** CreatePath - ensure all directories in path exist
+ ** Algorithm takes the pessimistic view and works top-down to ensure
+ ** each directory in path exists, rather than optimistically creating
+ ** the last element and working backwards.
+ */
+int CreatePath(const std::string &path, mode_t mode) {
+  char           *pp;
+  char           *sp;
+  int             status;
+  char           *copypath = strdup(path.c_str());
+
+  status = 0;
+  pp = copypath;
+  while (status == 0 && (sp = strchr(pp, '/')) != 0) {
+    if (sp != pp) {
+      /* Neither root nor double slash in path */
+      *sp = '\0';
+      status = DoCreatePath(copypath, mode);
+      *sp = '/';
+    }
+    pp = sp + 1;
+  }
+  if (status == 0)
+    status = DoCreatePath(path.c_str(), mode);
+  free(copypath);
+  return (status);
+}
 
 int GetChildren(const std::string& dir, std::vector<std::string>& result) {
   int res = 0;
@@ -134,34 +180,34 @@ bool DeleteDirIfExist(const std::string& path) {
 }
 
 uint64_t Du(const std::string& filename) {
-	struct stat statbuf;
-	uint64_t sum;
+  struct stat statbuf;
+  uint64_t sum;
   if (lstat(filename.c_str(), &statbuf) != 0) {
-		return 0;
-	}
-	if (S_ISLNK(statbuf.st_mode) && stat(filename.c_str(), &statbuf) != 0) {
-	  return 0;
-	}
+    return 0;
+  }
+  if (S_ISLNK(statbuf.st_mode) && stat(filename.c_str(), &statbuf) != 0) {
+    return 0;
+  }
   sum = statbuf.st_size;
-	if (S_ISDIR(statbuf.st_mode)) {
-		DIR *dir = NULL;
-		struct dirent *entry;
-		std::string newfile;
+  if (S_ISDIR(statbuf.st_mode)) {
+    DIR *dir = NULL;
+    struct dirent *entry;
+    std::string newfile;
 
-		dir = opendir(filename.c_str());
-		if (!dir) {
-			return sum;
-		}
-		while ((entry = readdir(dir))) {
-			if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0) {
-				continue;
+    dir = opendir(filename.c_str());
+    if (!dir) {
+      return sum;
+    }
+    while ((entry = readdir(dir))) {
+      if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0) {
+        continue;
       }
-			newfile = filename + "/" + entry->d_name;
-			sum += Du(newfile);
-		}
-		closedir(dir);
-	}
-	return sum;
+      newfile = filename + "/" + entry->d_name;
+      sum += Du(newfile);
+    }
+    closedir(dir);
+  }
+  return sum;
 }
 
 uint64_t NowMicros() {
@@ -178,11 +224,11 @@ SequentialFile::~SequentialFile() {
 }
 
 class PosixSequentialFile: public SequentialFile {
-private:
+ private:
   std::string filename_;
   FILE* file_;
 
-public:
+ public:
   virtual void setUnBuffer() {
     setbuf(file_, NULL);
   }
