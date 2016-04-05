@@ -2,6 +2,8 @@
 #define SLASH_MUTEXLOCK_H_
 
 #include <pthread.h>
+#include <string>
+#include <unordered_map>
 
 namespace slash {
 
@@ -72,6 +74,67 @@ class RWLock {
     // No copying allowed
     RWLock(const RWLock&);
     void operator=(const RWLock&);
+};
+
+class RefMutex {
+ public:
+  RefMutex();
+  ~RefMutex();
+
+  // Lock and Unlock will increase and decrease refs_,
+  // should check refs before Unlock
+  void Lock();
+  void Unlock();
+
+  void Ref();
+  void Unref();
+  bool IsLastRef() {
+    return refs_ == 1;
+  }
+
+ private:
+  pthread_mutex_t mu_;
+  int refs_;
+
+  // No copying
+  RefMutex(const RefMutex&);
+  void operator=(const RefMutex&);
+};
+
+class RecordMutex {
+public:
+  RecordMutex() {};
+  ~RecordMutex();
+
+  void Lock(const std::string &key);
+  void Unlock(const std::string &key);
+
+private:
+
+  Mutex mutex_;
+
+  std::unordered_map<std::string, RefMutex *> records_;
+
+  // No copying
+  RecordMutex(const RecordMutex&);
+  void operator=(const RecordMutex&);
+};
+
+class RecordLock {
+ public:
+  RecordLock(RecordMutex *mu, const std::string &key)
+      : mu_(mu), key_(key) {
+        mu_->Lock(key_);
+      }
+  ~RecordLock() { mu_->Unlock(key_); }
+
+ private:
+  RecordMutex *const mu_;
+  std::string key_;
+
+  // No copying allowed
+  RecordLock(const RecordLock&);
+  void operator=(const RecordLock&);
 };
 
 }
