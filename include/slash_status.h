@@ -39,6 +39,10 @@ class Status {
     return Status(kEndFile, msg, msg2);
   }
 
+  static Status Incomplete(const Slice& msg, const Slice& msg2 = Slice()) {
+    return Status(kIncomplete, msg, msg2);
+  }
+
   // Returns true iff the status indicates success.
   bool ok() const { return (state_ == NULL); }
 
@@ -53,6 +57,9 @@ class Status {
 
   // Returns true iff the status indicates an EOF.
   bool IsEndFile() const { return code() == kEndFile; }
+  
+  // Returns true iff the status is Incomplete 
+  bool IsIncomplete() const { return code() == kIncomplete; }
 
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
@@ -73,7 +80,8 @@ class Status {
     kNotSupported = 3,
     kInvalidArgument = 4,
     kIOError = 5,
-    kEndFile = 6
+    kEndFile = 6,
+    kIncomplete = 7
   };
 
   Code code() const {

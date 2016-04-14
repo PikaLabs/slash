@@ -1,6 +1,9 @@
 #include "env.h"
 
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include <assert.h>
 #include <dirent.h>
@@ -103,10 +106,37 @@ int GetChildren(const std::string& dir, std::vector<std::string>& result) {
   }
   struct dirent* entry;
   while ((entry = readdir(d)) != NULL) {
+    if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0) {
+      continue;
+    }
     result.push_back(entry->d_name);
   }
   closedir(d);
   return res;
+}
+
+bool GetDescendant(const std::string& dir, std::vector<std::string>& result) {
+  DIR* d = opendir(dir.c_str());
+  if (d == NULL) {
+    return false;
+  }
+  struct dirent* entry;
+  std::string fname;
+  while ((entry = readdir(d)) != NULL) {
+    if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0) {
+      continue;
+    }
+    fname = dir + "/" + entry->d_name;
+    if (0 == IsDir(fname)) {
+      if (!GetDescendant(fname, result)) {
+        return false;
+      }
+    } else {
+      result.push_back(fname);
+    }
+  }
+  closedir(d);
+  return true;
 }
 
 int RenameFile(const std::string& oldname, const std::string& newname) {
@@ -209,6 +239,152 @@ uint64_t Du(const std::string& filename) {
   }
   return sum;
 }
+
+// Clean files for rsync info, such as the lock, log, pid, conf file
+static bool CleanRsyncInfo(const std::string& path) {
+  return slash::DeleteDirIfExist(path + kRsyncSubDir);
+}
+
+int StartRsync(const std::string& raw_path, const std::string& module, const int port) {
+  // Sanity check  
+  if (raw_path.empty() || module.empty()) {
+    return -1;
+  }
+  std::string path(raw_path);
+  if (path.back() != '/') {
+    path += "/";
+  }
+  std::string rsync_path = path + kRsyncSubDir + "/";
+  CreatePath(rsync_path);
+
+  // Generate conf file
+  std::string conf_file(rsync_path + kRsyncConfFile);
+  std::ofstream conf_stream(conf_file.c_str());
+  if (!conf_stream) {
+    log_warn("Open rsync conf file failed!");
+    return -1;
+  }
+  conf_stream << "uid = root" << std::endl;
+  conf_stream << "gid = root" << std::endl;
+  conf_stream << "use chroot = no" << std::endl;
+  conf_stream << "max connections = 10" << std::endl;
+  conf_stream << "lock file = " << rsync_path + kRsyncLockFile << std::endl;
+  conf_stream << "log file = " << rsync_path + kRsyncLogFile << std::endl;
+  conf_stream << "pid file = " << rsync_path + kRsyncPidFile << std::endl;
+  conf_stream << "list = no" << std::endl;
+  conf_stream << "strict modes = no" << std::endl;
+  conf_stream << "[" << module << "]" << std::endl;
+  conf_stream << "path = " << path << std::endl;
+  conf_stream << "read only = no" << std::endl;
+  conf_stream.close();
+
+  // Execute rsync command
+  std::stringstream ss;
+  ss << "rsync --daemon --config=" << conf_file;
+  if (port != 873) {
+    ss << " --port=" << port;
+  }
+  std::string rsync_start_cmd = ss.str();
+  int ret = system(rsync_start_cmd.c_str());
+  if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
+    return 0;
+  }
+  log_warn("Start rsync deamon failed : %d!", ret);
+  return ret;
+}
+
+int StopRsync(const std::string& raw_path) {
+  // Sanity check  
+  if (raw_path.empty()) {
+    log_warn("empty rsync path!");
+    return -1;
+  }
+  std::string path(raw_path);
+  if (path.back() != '/') {
+    path += "/";
+  }
+
+  std::string pid_file(path + kRsyncSubDir + "/" + kRsyncPidFile);
+  if (!FileExists(pid_file)) {
+    log_warn("no rsync pid file found");
+    return 0; // Rsync deamon is not exist
+  }
+
+  // Kill Rsync
+  std::string rsync_stop_cmd = "kill `cat " + pid_file + "`";
+  int ret = system(rsync_stop_cmd.c_str());
+  if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
+    // Clean dir
+    CleanRsyncInfo(path);
+    return 0;
+  }
+  log_warn("Stop rsync deamon failed : %d!", ret);
+  return ret;
+}
+
+int RsyncSendFile(const std::string& local_file_path, const std::string& remote_file_path, const RsyncRemote& remote) {
+    std::stringstream ss;
+    ss << """rsync -avP --bwlimit=" << remote.kbps
+      << " --port=" << remote.port
+      << " " << local_file_path
+      << " " << remote.host
+      << "::" << remote.module << "/" << remote_file_path;
+
+    std::string rsync_cmd = ss.str();
+    std::cout << "rsync command: " << rsync_cmd << std::endl;
+    int ret = system(rsync_cmd.c_str());
+    if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
+        return 0;
+    }
+    log_warn("Rsync send file failed : %d!", ret);
+    return ret;
+}
+
+//int RsyncCopyDir(const std::string &local_dir_path, const std::string &remote_dir_path, const std::string &remote_host, const int dest_rsync_port) {
+//    int ret;
+//    struct dirent* dirent_ptr = NULL;
+//    struct stat file_info;
+//    DIR* local_dir = opendir(local_dir_path.c_str());
+//    if (local_dir == NULL) {
+//        //LOG(WARNING) << "open local dir path failed";
+//        return -1;
+//    }
+//    while ((dirent_ptr = readdir(local_dir)) != NULL) {
+//        char local_file_whole_path[100];
+//        char remote_file_whole_path[100];
+//        if (!strcmp(dirent_ptr->d_name, ".") || !strcmp(dirent_ptr->d_name, "..")) {
+//            continue;
+//        }
+//
+//        char dir_path[100];
+//
+//        strcpy(dir_path, local_dir_path.c_str());
+//        if (dir_path[strlen(dir_path)-1] == '/') {
+//            dir_path[strlen(dir_path)-1] = '\0';
+//        }
+//        snprintf(local_file_whole_path, sizeof(local_file_whole_path), "%s/%s", dir_path, dirent_ptr->d_name);
+//        strcpy(dir_path, remote_dir_path.c_str());
+//        if (dir_path[strlen(dir_path)-1] == '/') {
+//            dir_path[strlen(dir_path)-1] = '\0';
+//        }
+//        snprintf(remote_file_whole_path, sizeof(remote_file_whole_path), "%s/%s", dir_path, dirent_ptr->d_name);
+//        if (stat(local_file_whole_path, &file_info) != 0) {
+//            closedir(local_dir);
+//            return -2;
+//        }
+//        if (file_info.st_mode & S_IFDIR) {
+//            ret = RsyncCopyDir(local_file_whole_path, remote_file_whole_path, remote_host, dest_rsync_port);
+//        } else {
+//            ret = RsyncCopyFile(local_file_whole_path, remote_file_whole_path, remote_host, dest_rsync_port);
+//        }
+//        if (ret != 0) {
+//            closedir(local_dir);
+//            return -3;
+//        }
+//    }
+//    closedir(local_dir);
+//    return 0;
+//}
 
 uint64_t NowMicros() {
   struct timeval tv;
