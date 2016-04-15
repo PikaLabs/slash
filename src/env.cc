@@ -1,7 +1,6 @@
 #include "env.h"
 
 #include <vector>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -331,7 +330,6 @@ int RsyncSendFile(const std::string& local_file_path, const std::string& remote_
     << "::" << remote.module << "/" << remote_file_path;
 
   std::string rsync_cmd = ss.str();
-  std::cout << "rsync command: " << rsync_cmd << std::endl;
   int ret = system(rsync_cmd.c_str());
   if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
     return 0;
@@ -357,7 +355,6 @@ int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& r
     << " " << remote.host
     << "::" << remote.module << "/" << remote_dir;
   std::string rsync_cmd = ss.str();
-  std::cout << "rsync command: " << rsync_cmd << std::endl;
   int ret = system(rsync_cmd.c_str());
   if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
     return 0;
