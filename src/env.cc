@@ -311,7 +311,7 @@ int StopRsync(const std::string& raw_path) {
   }
 
   // Kill Rsync
-  std::string rsync_stop_cmd = "kill `cat " + pid_file + "`";
+  std::string rsync_stop_cmd = "kill -9 `cat " + pid_file + "`";
   int ret = system(rsync_stop_cmd.c_str());
   if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
     // Clean dir
@@ -323,68 +323,48 @@ int StopRsync(const std::string& raw_path) {
 }
 
 int RsyncSendFile(const std::string& local_file_path, const std::string& remote_file_path, const RsyncRemote& remote) {
-    std::stringstream ss;
-    ss << """rsync -avP --bwlimit=" << remote.kbps
-      << " --port=" << remote.port
-      << " " << local_file_path
-      << " " << remote.host
-      << "::" << remote.module << "/" << remote_file_path;
+  std::stringstream ss;
+  ss << """rsync -avP --bwlimit=" << remote.kbps
+    << " --port=" << remote.port
+    << " " << local_file_path
+    << " " << remote.host
+    << "::" << remote.module << "/" << remote_file_path;
 
-    std::string rsync_cmd = ss.str();
-    std::cout << "rsync command: " << rsync_cmd << std::endl;
-    int ret = system(rsync_cmd.c_str());
-    if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
-        return 0;
-    }
-    log_warn("Rsync send file failed : %d!", ret);
-    return ret;
+  std::string rsync_cmd = ss.str();
+  std::cout << "rsync command: " << rsync_cmd << std::endl;
+  int ret = system(rsync_cmd.c_str());
+  if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
+    return 0;
+  }
+  log_warn("Rsync send file failed : %d!", ret);
+  return ret;
 }
 
-//int RsyncCopyDir(const std::string &local_dir_path, const std::string &remote_dir_path, const std::string &remote_host, const int dest_rsync_port) {
-//    int ret;
-//    struct dirent* dirent_ptr = NULL;
-//    struct stat file_info;
-//    DIR* local_dir = opendir(local_dir_path.c_str());
-//    if (local_dir == NULL) {
-//        //LOG(WARNING) << "open local dir path failed";
-//        return -1;
-//    }
-//    while ((dirent_ptr = readdir(local_dir)) != NULL) {
-//        char local_file_whole_path[100];
-//        char remote_file_whole_path[100];
-//        if (!strcmp(dirent_ptr->d_name, ".") || !strcmp(dirent_ptr->d_name, "..")) {
-//            continue;
-//        }
-//
-//        char dir_path[100];
-//
-//        strcpy(dir_path, local_dir_path.c_str());
-//        if (dir_path[strlen(dir_path)-1] == '/') {
-//            dir_path[strlen(dir_path)-1] = '\0';
-//        }
-//        snprintf(local_file_whole_path, sizeof(local_file_whole_path), "%s/%s", dir_path, dirent_ptr->d_name);
-//        strcpy(dir_path, remote_dir_path.c_str());
-//        if (dir_path[strlen(dir_path)-1] == '/') {
-//            dir_path[strlen(dir_path)-1] = '\0';
-//        }
-//        snprintf(remote_file_whole_path, sizeof(remote_file_whole_path), "%s/%s", dir_path, dirent_ptr->d_name);
-//        if (stat(local_file_whole_path, &file_info) != 0) {
-//            closedir(local_dir);
-//            return -2;
-//        }
-//        if (file_info.st_mode & S_IFDIR) {
-//            ret = RsyncCopyDir(local_file_whole_path, remote_file_whole_path, remote_host, dest_rsync_port);
-//        } else {
-//            ret = RsyncCopyFile(local_file_whole_path, remote_file_whole_path, remote_host, dest_rsync_port);
-//        }
-//        if (ret != 0) {
-//            closedir(local_dir);
-//            return -3;
-//        }
-//    }
-//    closedir(local_dir);
-//    return 0;
-//}
+int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& remote_dir_path, const RsyncRemote& remote) {
+  if (local_dir_path.empty() || remote_dir_path.empty()) {
+    return -2;
+  }
+  std::string local_dir(local_dir_path), remote_dir(remote_dir_path);
+  if (local_dir_path.back() != '/') {
+    local_dir.append("/");
+  }
+  if (remote_dir_path.back() != '/') {
+    remote_dir.append("/");
+  }
+  std::stringstream ss;
+  ss << "rsync -avP --delete --port=" << remote.port
+    << " " << local_dir
+    << " " << remote.host
+    << "::" << remote.module << "/" << remote_dir;
+  std::string rsync_cmd = ss.str();
+  std::cout << "rsync command: " << rsync_cmd << std::endl;
+  int ret = system(rsync_cmd.c_str());
+  if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
+    return 0;
+  }
+  log_warn("Rsync send file failed : %d!", ret);
+  return ret;
+}
 
 uint64_t NowMicros() {
   struct timeval tv;

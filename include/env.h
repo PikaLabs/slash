@@ -53,6 +53,8 @@ int StartRsync(const std::string& rsync_path, const std::string& module, const i
 int StopRsync(const std::string& path);
 int RsyncSendFile(const std::string& local_file_path, const std::string& remote_file_path,
     const RsyncRemote& remote);
+int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& remote_dir_path,
+    const RsyncRemote& remote);
 
 /*
  * Whether the file is exist
