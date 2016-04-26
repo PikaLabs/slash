@@ -1,4 +1,3 @@
-#include <glog/logging.h>
 #include <algorithm>
 #include <sys/stat.h>
 
