@@ -40,7 +40,7 @@ int BaseConf::LoadConf()
     type = kComment;
     line_len = strlen(line);
     for (int i = 0; i < line_len; i++) {
-      if (line[i] == NUMBER) {
+      if (line[i] == COMMENT) {
         type = kComment;
         break;
       }

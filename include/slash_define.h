@@ -3,7 +3,7 @@
 
 #define SPACE ' '
 #define COLON ':'
-#define NUMBER '#'
+#define COMMENT '#'
 
 
 #endif
