@@ -515,6 +515,116 @@ class MmapRWFile : public RWFile
   char* base_;
 };
 
+class PosixRandomRWFile : public RandomRWFile {
+ private:
+  const std::string filename_;
+  int fd_;
+  bool pending_sync_;
+  bool pending_fsync_;
+  //bool fallocate_with_keep_size_;
+
+ public:
+  PosixRandomRWFile(const std::string& fname, int fd)
+      : filename_(fname),
+        fd_(fd),
+        pending_sync_(false),
+        pending_fsync_(false) {
+    //fallocate_with_keep_size_ = options.fallocate_with_keep_size;
+  }
+
+  ~PosixRandomRWFile() {
+    if (fd_ >= 0) {
+      Close();
+    }
+  }
+
+  virtual Status Write(uint64_t offset, const Slice& data) override {
+    const char* src = data.data();
+    size_t left = data.size();
+    Status s;
+    pending_sync_ = true;
+    pending_fsync_ = true;
+
+    while (left != 0) {
+      ssize_t done = pwrite(fd_, src, left, offset);
+      if (done < 0) {
+        if (errno == EINTR) {
+          continue;
+        }
+        return IOError(filename_, errno);
+      }
+
+      left -= done;
+      src += done;
+      offset += done;
+    }
+
+    return Status::OK();
+  }
+
+  virtual Status Read(uint64_t offset, size_t n, Slice* result,
+                      char* scratch) const override {
+    Status s;
+    ssize_t r = -1;
+    size_t left = n;
+    char* ptr = scratch;
+    while (left > 0) {
+      r = pread(fd_, ptr, left, static_cast<off_t>(offset));
+      if (r <= 0) {
+        if (errno == EINTR) {
+          continue;
+        }
+        break;
+      }
+      ptr += r;
+      offset += r;
+      left -= r;
+    }
+    *result = Slice(scratch, (r < 0) ? 0 : n - left);
+    if (r < 0) {
+      s = IOError(filename_, errno);
+    }
+    return s;
+  }
+
+  virtual Status Close() override {
+    Status s = Status::OK();
+    if (fd_ >= 0 && close(fd_) < 0) {
+      s = IOError(filename_, errno);
+    }
+    fd_ = -1;
+    return s;
+  }
+
+  virtual Status Sync() override {
+    if (pending_sync_ && fdatasync(fd_) < 0) {
+      return IOError(filename_, errno);
+    }
+    pending_sync_ = false;
+    return Status::OK();
+  }
+
+  virtual Status Fsync() override {
+    if (pending_fsync_ && fsync(fd_) < 0) {
+      return IOError(filename_, errno);
+    }
+    pending_fsync_ = false;
+    pending_sync_ = false;
+    return Status::OK();
+  }
+
+//  virtual Status Allocate(off_t offset, off_t len) override {
+//    TEST_KILL_RANDOM(rocksdb_kill_odds);
+//    int alloc_status = fallocate(
+//        fd_, fallocate_with_keep_size_ ? FALLOC_FL_KEEP_SIZE : 0, offset, len);
+//    if (alloc_status == 0) {
+//      return Status::OK();
+//    } else {
+//      return IOError(filename_, errno);
+//    }
+//  }
+};
+
 Status NewSequentialFile(const std::string& fname, SequentialFile** result) {
   FILE* f = fopen(fname.c_str(), "r");
   if (f == NULL) {
@@ -558,6 +668,18 @@ Status AppendWritableFile(const std::string& fname, WritableFile** result, uint6
     s = IOError(fname, errno);
   } else {
     *result = new PosixMmapFile(fname, fd, kPageSize, write_len);
+  }
+  return s;
+}
+
+Status NewRandomRWFile(const std::string& fname, RandomRWFile** result) {
+  Status s;
+  const int fd = open(fname.c_str(), O_CREAT | O_RDWR, 0644);
+  if (fd < 0) {
+    *result = NULL;
+    s = IOError(fname, errno);
+  } else {
+    *result = new PosixRandomRWFile(fname, fd);
   }
   return s;
 }

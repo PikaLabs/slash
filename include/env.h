@@ -12,6 +12,7 @@ namespace slash {
 class WritableFile;
 class SequentialFile;
 class RWFile;
+class RandomRWFile;
 
 /*
  * Set size of initial mmap size
@@ -57,6 +58,7 @@ Status AppendSequentialFile(const std::string& fname, SequentialFile** result);
 
 Status AppendWritableFile(const std::string& fname, WritableFile** result, uint64_t write_len = 0);
 
+Status NewRandomRWFile(const std::string& fname, RandomRWFile** result);
 
 // A file abstraction for sequential writing.  The implementation
 // must provide buffering since callers may append small fragments
@@ -100,6 +102,55 @@ private:
   // No copying allowed
   RWFile(const RWFile&);
   void operator=(const RWFile&);
+};
+
+// A file abstraction for random reading and writing.
+class RandomRWFile {
+ public:
+  RandomRWFile() {}
+  virtual ~RandomRWFile() {}
+
+  // Write data from Slice data to file starting from offset
+  // Returns IOError on failure, but does not guarantee
+  // atomicity of a write.  Returns OK status on success.
+  //
+  // Safe for concurrent use.
+  virtual Status Write(uint64_t offset, const Slice& data) = 0;
+  // Read up to "n" bytes from the file starting at "offset".
+  // "scratch[0..n-1]" may be written by this routine.  Sets "*result"
+  // to the data that was read (including if fewer than "n" bytes were
+  // successfully read).  May set "*result" to point at data in
+  // "scratch[0..n-1]", so "scratch[0..n-1]" must be live when
+  // "*result" is used.  If an error was encountered, returns a non-OK
+  // status.
+  //
+  // Safe for concurrent use by multiple threads.
+  virtual Status Read(uint64_t offset, size_t n, Slice* result,
+                      char* scratch) const = 0;
+  virtual Status Close() = 0; // closes the file
+  virtual Status Sync() = 0; // sync data
+
+  /*
+   * Sync data and/or metadata as well.
+   * By default, sync only data.
+   * Override this method for environments where we need to sync
+   * metadata as well.
+   */
+  virtual Status Fsync() {
+    return Sync();
+  }
+
+  /*
+   * Pre-allocate space for a file.
+   */
+  virtual Status Allocate(off_t offset, off_t len) {
+    return Status::OK();
+  }
+
+ private:
+  // No copying allowed
+  RandomRWFile(const RandomRWFile&);
+  void operator=(const RandomRWFile&);
 };
 
 
