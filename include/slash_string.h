@@ -47,5 +47,6 @@ std::vector<std::string> &StringSplit(const std::string &s,
         char delim, std::vector<std::string> &elems);
 std::string StringConcat(const std::vector<std::string> &elems, char delim);
 std::string& StringToLower(std::string& ori);
+std::string IpPortString(const std::string& ip, int port);
 }
 #endif

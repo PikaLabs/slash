@@ -533,6 +533,17 @@ std::string& StringToLower(std::string& ori) {
   return ori;
 }
 
+std::string IpPortString(const std::string& ip, int port) {
+  if (ip.empty()) {
+    return std::string();
+  }
+  char buf[10];
+  if (ll2string(buf, sizeof(buf), port) <= 0) {
+    return std::string();
+  }
+  return (ip + ":" + buf);
+}
+
 
 #ifdef UTIL_TEST_MAIN
 #include <assert.h>
