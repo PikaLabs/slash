@@ -170,6 +170,8 @@ class RandomRWFile {
    * Pre-allocate space for a file.
    */
   virtual Status Allocate(off_t offset, off_t len) {
+    (void)offset;
+    (void)len;
     return Status::OK();
   }
 
