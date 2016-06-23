@@ -189,7 +189,6 @@ bool BaseConf::WriteBack()
     if (item_[i].type == kConf) {
       tmp = item_[i].name + " : " + item_[i].value + "\n";
       write_file->Append(tmp);
-      //write_file->Append(tmp.c_str(), tmp.length());
     } else {
       write_file->Append(item_[i].value);
     }
@@ -197,6 +196,7 @@ bool BaseConf::WriteBack()
   write_file->Close();
   DeleteFile(path_);
   RenameFile(tmp_path, path_);
+  return true;
 }
 
 
