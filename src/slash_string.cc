@@ -544,6 +544,50 @@ std::string IpPortString(const std::string& ip, int port) {
   return (ip + ":" + buf);
 }
 
+std::string ToRead(const std::string& str) {
+  std::string read;
+  if (str.empty()) {
+    return read;
+  }
+  read.append(1, '"');
+  char buf[16];
+  std::string::const_iterator iter = str.begin();
+  while (iter != str.end()) {
+    switch (*iter) {
+      case '\\' :
+      case '"':
+        read.append(1, '\\');
+        read.append(1, *iter);
+        break;
+      case '\n':
+        read.append("\\n");
+        break;
+      case '\r':
+        read.append("\\r");
+        break;
+      case '\t':
+        read.append("\\t");
+        break;
+      case '\a':
+        read.append("\\a");
+        break;
+      case '\b':
+        read.append("\\b");
+        break;
+      default:
+        if (isprint(*iter)) {
+          read.append(1, *iter);
+        } else {
+          snprintf(buf, sizeof(buf), "\\x%02x", static_cast<unsigned char>(*iter));
+          read.append(buf);
+        }
+        break;
+    }
+    iter++;
+  }
+  read.append(1, '"');
+  return read;
+}
 
 #ifdef UTIL_TEST_MAIN
 #include <assert.h>
