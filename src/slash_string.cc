@@ -695,6 +695,23 @@ void test_string2l(void) {
     assert(string2l(buf,strlen(buf),&v) == 0);
 #endif
 }
+
+bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port) {
+  if (ip_port.empty()) {
+    return false;
+  }
+  size_t pos = ip_port.find(':');
+  if (pos == std::string::npos) {
+    return false;
+  }
+  ip = ip_port.substr(0, pos);
+  std::string port_str = ip_port.substr(pos + 1);
+  if (1 != string2l(port_str.data(), port_str.size(), &port)) {
+    return false;
+  }
+  return true;
+}
+
 int main(int argc, char **argv) {
     test_string2ll();
     test_string2l();
