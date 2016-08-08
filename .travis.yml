@@ -1,0 +1,15 @@
+sudo: false
+language: cpp
+
+os:
+  - linux
+
+compiler: 
+  - clang
+  - gcc
+
+language: cpp
+notifications:
+  email:
+    - chenzongzhi@360.cn
+
