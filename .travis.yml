@@ -13,3 +13,4 @@ notifications:
   email:
     - chenzongzhi@360.cn
 
+script: make
