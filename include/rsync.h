@@ -19,7 +19,7 @@ struct RsyncRemote {
   : host(_host), port(_port), module(_module), kbps(_kbps) {}
 };
 
-int StartRsync(const std::string& rsync_path, const std::string& module, const int port);
+int StartRsync(const std::string& rsync_path, const std::string& module, const std::string& ip, const int port);
 int StopRsync(const std::string& path);
 int RsyncSendFile(const std::string& local_file_path, const std::string& remote_file_path,
     const RsyncRemote& remote);

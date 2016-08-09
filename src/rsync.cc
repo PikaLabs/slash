@@ -12,7 +12,7 @@ static bool CleanRsyncInfo(const std::string& path) {
   return slash::DeleteDirIfExist(path + kRsyncSubDir);
 }
 
-int StartRsync(const std::string& raw_path, const std::string& module, const int port) {
+int StartRsync(const std::string& raw_path, const std::string& module, const std::string& ip, const int port) {
   // Sanity check  
   if (raw_path.empty() || module.empty()) {
     return -1;
@@ -48,6 +48,7 @@ int StartRsync(const std::string& raw_path, const std::string& module, const int
   // Execute rsync command
   std::stringstream ss;
   ss << "rsync --daemon --config=" << conf_file;
+  ss << " --address=" << ip;
   if (port != 873) {
     ss << " --port=" << port;
   }
