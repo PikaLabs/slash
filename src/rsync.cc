@@ -82,11 +82,11 @@ int StopRsync(const std::string& raw_path) {
   std::string rsync_stop_cmd = "kill -9 `cat " + pid_file + "`";
   int ret = system(rsync_stop_cmd.c_str());
   if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
-    // Clean dir
-    CleanRsyncInfo(path);
-    return 0;
+    log_info("Stop rsync success!");
+  } else {
+    log_warn("Stop rsync deamon failed : %d!", ret);
   }
-  log_warn("Stop rsync deamon failed : %d!", ret);
+  CleanRsyncInfo(path);
   return ret;
 }
 
