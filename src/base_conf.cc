@@ -45,15 +45,16 @@ int BaseConf::LoadConf()
         break;
       }
       switch (line[i]) {
-      case COLON: 
-        type = kConf;
-        sep_sign = 1;
       case SPACE:
-        continue;
       case '\r':
-        continue;
       case '\n':
-        continue;
+        break;
+      case COLON: 
+        if (!sep_sign) {
+          type = kConf;
+          sep_sign = 1;
+          break;
+        }
       default:
         if (sep_sign == 0) {
           name[name_len++] = line[i];
