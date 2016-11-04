@@ -1,7 +1,8 @@
 #include "include/testutil.h"
-#include "include/random.h"
 
 #include <string>
+
+#include "include/random.h"
 
 namespace slash {
 

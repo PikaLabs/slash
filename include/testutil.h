@@ -5,7 +5,7 @@
 
 namespace slash {
 
-extern std::string RandomString();
+extern std::string RandomString(const int len);
 
 extern std::string RandomKey();
 };  // namespace slash
