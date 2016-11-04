@@ -10,7 +10,8 @@ SRC_DIR = ./src/
 OUTPUT = ./output/
 
 
-INCLUDE_PATH = -I./include/ \
+INCLUDE_PATH = -I./ \
+							 -I./include/
 
 LIB_PATH = -L./ \
 
