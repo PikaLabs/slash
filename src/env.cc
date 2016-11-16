@@ -96,6 +96,45 @@ int CreatePath(const std::string &path, mode_t mode) {
   return (status);
 }
 
+static int LockOrUnlock(int fd, bool lock) {
+  errno = 0;
+  struct flock f;
+  memset(&f, 0, sizeof(f));
+  f.l_type = (lock ? F_WRLCK : F_UNLCK);
+  f.l_whence = SEEK_SET;
+  f.l_start = 0;
+  f.l_len = 0;        // Lock/unlock entire file
+  return fcntl(fd, F_SETLK, &f);
+}
+
+Status LockFile(const std::string& fname, FileLock** lock) {
+  *lock = NULL;
+  Status result;
+  int fd = open(fname.c_str(), O_RDWR | O_CREAT, 0644);
+  if (fd < 0) {
+    result = IOError(fname, errno);
+  } else if (LockOrUnlock(fd, true) == -1) {
+    result = IOError("lock " + fname, errno);
+    close(fd);
+  } else {
+    FileLock* my_lock = new FileLock;
+    my_lock->fd_ = fd;
+    my_lock->name_ = fname;
+    *lock = my_lock;
+  }
+  return result;
+}
+
+Status UnlockFile(FileLock* lock) {
+  Status result;
+  if (LockOrUnlock(lock->fd_, false) == -1) {
+    result = IOError("unlock", errno);
+  }
+  close(lock->fd_);
+  delete lock;
+  return result;
+}
+
 int GetChildren(const std::string& dir, std::vector<std::string>& result) {
   int res = 0;
   result.clear();

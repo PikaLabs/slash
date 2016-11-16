@@ -42,6 +42,24 @@ Status DeleteFile(const std::string& fname);
 
 int RenameFile(const std::string& oldname, const std::string& newname);
 
+class FileLock {
+  public:
+    FileLock() { }
+    virtual ~FileLock() {};
+
+    int fd_;
+    std::string name_;
+
+  private:
+
+    // No copying allowed
+    FileLock(const FileLock&);
+    void operator=(const FileLock&);
+};
+
+Status LockFile(const std::string& f, FileLock** l);
+Status UnlockFile(FileLock* l);
+
 int GetChildren(const std::string& dir, std::vector<std::string>& result);
 bool GetDescendant(const std::string& dir, std::vector<std::string>& result);
 
