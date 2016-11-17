@@ -1,23 +1,27 @@
-#include <algorithm>
+// Copyright (c) 2015-present, Qihoo, Inc.  All rights reserved.
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree. An additional grant
+// of patent rights can be found in the PATENTS file in the same directory.
+
+#include "include/base_conf.h"
+
 #include <sys/stat.h>
 
-#include "base_conf.h"
-#include "env.h"
-#include "xdebug.h"
+#include <algorithm>
+
+#include "include/env.h"
+#include "include/xdebug.h"
 
 namespace slash {
 
 BaseConf::BaseConf(const std::string &path) :
-  path_(path)
-{
+  path_(path) {
 }
 
-BaseConf::~BaseConf()
-{
+BaseConf::~BaseConf() {
 }
 
-int BaseConf::LoadConf()
-{
+int BaseConf::LoadConf() {
   if (!FileExists(path_)) {
     return -1;
   }
@@ -25,7 +29,7 @@ int BaseConf::LoadConf()
   NewSequentialFile(path_, &sequential_file);
 
   // read conf items
-  
+
   char line[CONF_ITEM_LEN];
   char name[CONF_ITEM_LEN], value[CONF_ITEM_LEN];
   int line_len = 0;
@@ -49,7 +53,7 @@ int BaseConf::LoadConf()
       case '\r':
       case '\n':
         break;
-      case COLON: 
+      case COLON:
         if (!sep_sign) {
           type = kConf;
           sep_sign = 1;
@@ -71,16 +75,14 @@ int BaseConf::LoadConf()
     }
   }
 
-  //sequential_file->Close();
+  // sequential_file->Close();
   delete sequential_file;
   return 0;
 }
 
-
-bool BaseConf::GetConfInt(const std::string &name, int* value) const
-{
+bool BaseConf::GetConfInt(const std::string &name, int* value) const {
   for (int i = 0; i < item_.size(); i++) {
-    if (item_[i].type == 1) {
+    if (item_[i].type == kComment) {
       continue;
     }
     if (name == item_[i].name) {
@@ -91,8 +93,7 @@ bool BaseConf::GetConfInt(const std::string &name, int* value) const
   return false;
 }
 
-bool BaseConf::GetConfStr(const std::string &name, std::string *val) const
-{
+bool BaseConf::GetConfStr(const std::string &name, std::string *val) const {
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == 1) {
       continue;
@@ -104,16 +105,16 @@ bool BaseConf::GetConfStr(const std::string &name, std::string *val) const
   }
   return false;
 }
-bool BaseConf::GetConfStrVec(const std::string &name, std::vector<std::string> *value) const
-{
+
+bool BaseConf::GetConfStrVec(const std::string &name, std::vector<std::string> *value) const {
   for (int i = 0; i < item_.size(); i++) {
-    if (item_[i].type == 1) {
+    if (item_[i].type == kComment) {
       continue;
     }
     if (name == item_[i].name) {
       std::string val_str = item_[i].value;
       std::string::size_type pos;
-      while(true) {
+      while (true) {
         pos = val_str.find(",");
         if (pos == std::string::npos) {
           value->push_back(val_str);
@@ -128,10 +129,9 @@ bool BaseConf::GetConfStrVec(const std::string &name, std::vector<std::string> *
   return false;
 }
 
-bool BaseConf::GetConfBool(const std::string &name, bool* value) const
-{
+bool BaseConf::GetConfBool(const std::string &name, bool* value) const {
   for (int i = 0; i < item_.size(); i++) {
-    if (item_[i].type == 1) {
+    if (item_[i].type == kComment) {
       continue;
     }
     if (name == item_[i].name) {
@@ -146,8 +146,7 @@ bool BaseConf::GetConfBool(const std::string &name, bool* value) const
   return false;
 }
 
-bool BaseConf::SetConfInt(const std::string &name, const int value)
-{
+bool BaseConf::SetConfInt(const std::string &name, const int value) {
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == kComment) {
       continue;
@@ -160,8 +159,7 @@ bool BaseConf::SetConfInt(const std::string &name, const int value)
   return false;
 }
 
-bool BaseConf::SetConfStr(const std::string &name, const std::string &value)
-{
+bool BaseConf::SetConfStr(const std::string &name, const std::string &value) {
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == kComment) {
       continue;
@@ -174,8 +172,7 @@ bool BaseConf::SetConfStr(const std::string &name, const std::string &value)
   return false;
 }
 
-bool BaseConf::SetConfBool(const std::string &name, const bool value)
-{
+bool BaseConf::SetConfBool(const std::string &name, const bool value) {
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == kComment) {
       continue;
@@ -192,8 +189,7 @@ bool BaseConf::SetConfBool(const std::string &name, const bool value)
   return false;
 }
 
-void BaseConf::DumpConf() const
-{
+void BaseConf::DumpConf() const {
   int cnt = 1;
   for (int i = 0; i < item_.size(); i++) {
     if (item_[i].type == kConf) {
@@ -202,8 +198,7 @@ void BaseConf::DumpConf() const
   }
 }
 
-bool BaseConf::WriteBack()
-{
+bool BaseConf::WriteBack() {
   WritableFile *write_file;
   std::string tmp_path = path_ + ".tmp";
   Status ret = NewWritableFile(tmp_path, &write_file);
@@ -222,6 +217,5 @@ bool BaseConf::WriteBack()
   RenameFile(tmp_path, path_);
   return true;
 }
-
 
 }   // namespace slash
