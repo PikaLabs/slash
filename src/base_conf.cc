@@ -104,6 +104,29 @@ bool BaseConf::GetConfStr(const std::string &name, std::string *val) const
   }
   return false;
 }
+bool BaseConf::GetConfStrVec(const std::string &name, std::vector<std::string> *value) const
+{
+  for (int i = 0; i < item_.size(); i++) {
+    if (item_[i].type == 1) {
+      continue;
+    }
+    if (name == item_[i].name) {
+      std::string val_str = item_[i].value;
+      std::string::size_type pos;
+      while(true) {
+        pos = val_str.find(",");
+        if (pos == std::string::npos) {
+          value->push_back(val_str);
+          break;
+        }
+        value->push_back(val_str.substr(0, pos));
+        val_str = val_str.substr(pos+1);
+      }
+      return true;
+    }
+  }
+  return false;
+}
 
 bool BaseConf::GetConfBool(const std::string &name, bool* value) const
 {
