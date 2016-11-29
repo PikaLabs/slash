@@ -3,9 +3,8 @@ ifeq ($(__PERF), 1)
 	CXXFLAGS = -O0 -g -pg -pipe -fPIC -D__XDEBUG__ -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
 else
 	CXXFLAGS = -O2 -pipe -fPIC -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
-	# CXXFLAGS = -Wall -W -DDEBUG -g -O0 -D__XDEBUG__ 
 endif
-OBJECT = conf_test
+OBJECT = conf_test cond_lock_example
 SRC_DIR = ./
 OUTPUT = ./output
 
@@ -15,7 +14,7 @@ LIB_PATH = -L../ \
 LIBS = -lslash \
 			 -lpthread
 
-INCLUDE_PATH = -I../output/include/
+INCLUDE_PATH = -I../output/
 
 .PHONY: all clean version
 
@@ -36,6 +35,8 @@ all: $(OBJECT)
 
 
 conf_test: conf_test.cc
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
+cond_lock_example: cond_lock_example.cc
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
 
 $(OBJS): %.o : %.cc
