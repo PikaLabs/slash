@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 
 namespace slash {
 
@@ -40,6 +41,22 @@ CondVar::~CondVar() {
 
 void CondVar::Wait() {
   PthreadCall("wait", pthread_cond_wait(&cv_, &mu_->mu_));
+}
+
+void CondVar::TimedWait(uint32_t timeout) {
+  /*
+   * pthread_cond_timedwait api use absolute API
+   * so we need gettimeofday + timeout
+   */
+  struct timeval now;
+  gettimeofday(&now, NULL);
+  struct timespec tsp;
+
+  tsp.tv_sec = now.tv_sec;
+  tsp.tv_sec += timeout / 1000;
+  tsp.tv_nsec = now.tv_usec * 1000;
+  tsp.tv_nsec += static_cast<long>(timeout % 1000) * 1000000;
+  pthread_cond_timedwait(&cv_, &mu_->mu_, &tsp);
 }
 
 void CondVar::Signal() {

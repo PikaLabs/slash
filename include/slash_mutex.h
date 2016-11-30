@@ -32,8 +32,15 @@ public:
   explicit CondVar(Mutex* mu);
   ~CondVar();
   void Wait();
+  /*
+   * timeout is millisecond
+   * so if you want to wait for 1 s, you should call
+   * TimeWait(1000);
+   */
+  void TimedWait(uint32_t timeout);
   void Signal();
   void SignalAll();
+  
 private:
   pthread_cond_t cv_;
   Mutex* mu_;
