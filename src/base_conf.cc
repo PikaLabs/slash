@@ -212,9 +212,10 @@ bool BaseConf::WriteBack() {
       write_file->Append(item_[i].value);
     }
   }
-  write_file->Close();
+  // write_file->Close();
   DeleteFile(path_);
   RenameFile(tmp_path, path_);
+  delete write_file;
   return true;
 }
 
