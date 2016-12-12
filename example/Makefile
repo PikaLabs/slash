@@ -36,6 +36,7 @@ all: $(OBJECT)
 
 conf_test: conf_test.cc
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
+
 cond_lock_example: cond_lock_example.cc
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
 
