@@ -5,8 +5,8 @@ else
 	#CXXFLAGS = -O2 -pipe -fPIC -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
 	CXXFLAGS = -O0 -g -pg -pipe -fPIC -D__XDEBUG__ -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
 endif
-OBJECT = conf_test binlog_test
-#OBJECT = conf_test cond_lock_example binlog_test
+#OBJECT = conf_test binlog_test
+OBJECT = conf_test cond_lock_example binlog_test
 SRC_DIR = ./
 OUTPUT = ./output
 
