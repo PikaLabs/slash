@@ -48,10 +48,10 @@ void CondLock::TimedWait(uint32_t timeout) {
   gettimeofday(&now, NULL);
   struct timespec tsp;
 
-  tsp.tv_sec = now.tv_sec;
-  tsp.tv_sec += timeout / 1000;
-  tsp.tv_nsec = now.tv_usec * 1000;
-  tsp.tv_nsec += static_cast<long>(timeout % 1000) * 1000000;
+  int64_t usec = now.tv_usec + timeout * 1000LL;
+  tsp.tv_sec = now.tv_sec + usec / 1000000;
+  tsp.tv_nsec = (usec % 1000000) * 1000;
+
   pthread_cond_timedwait(&cond_, &mutex_, &tsp);
 }
 

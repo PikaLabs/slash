@@ -6,7 +6,7 @@ else
 	CXXFLAGS = -O0 -g -pg -pipe -fPIC -D__XDEBUG__ -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
 endif
 #OBJECT = conf_test binlog_test
-OBJECT = conf_test cond_lock_example binlog_test
+OBJECT = conf_test cond_lock_example binlog_test mutex_test
 SRC_DIR = ./
 OUTPUT = ./output
 
@@ -43,6 +43,9 @@ cond_lock_example: cond_lock_example.cc
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
 
 binlog_test: binlog_test.cc
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
+
+mutex_test: mutex_test.cc
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) $(LIBS)
 
 $(OBJS): %.o : %.cc

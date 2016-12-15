@@ -52,10 +52,10 @@ void CondVar::TimedWait(uint32_t timeout) {
   gettimeofday(&now, NULL);
   struct timespec tsp;
 
-  tsp.tv_sec = now.tv_sec;
-  tsp.tv_sec += timeout / 1000;
-  tsp.tv_nsec = now.tv_usec * 1000;
-  tsp.tv_nsec += static_cast<long>(timeout % 1000) * 1000000;
+  int64_t usec = now.tv_usec + timeout * 1000LL;
+  tsp.tv_sec = now.tv_sec + usec / 1000000;
+  tsp.tv_nsec = (usec % 1000000) * 1000;
+
   pthread_cond_timedwait(&cv_, &mu_->mu_, &tsp);
 }
 
@@ -114,15 +114,12 @@ void RecordMutex::Lock(const std::string &key) {
   std::unordered_map<std::string, RefMutex *>::const_iterator it = records_.find(key);
 
   if (it != records_.end()) {
-    //log_info ("tid=(%u) >Lock key=(%s) exist, map_size=%u", pthread_self(), key.c_str(), records_.size());
     RefMutex *ref_mutex = it->second;
     ref_mutex->Ref();
     mutex_.Unlock();
 
     ref_mutex->Lock();
-    //log_info ("tid=(%u) <Lock key=(%s) exist", pthread_self(), key.c_str());
   } else {
-    //log_info ("tid=(%u) >Lock key=(%s) new, map_size=%u ++", pthread_self(), key.c_str(), records_.size());
     RefMutex *ref_mutex = new RefMutex();
 
     records_.insert(std::make_pair(key, ref_mutex));
@@ -130,7 +127,6 @@ void RecordMutex::Lock(const std::string &key) {
     mutex_.Unlock();
 
     ref_mutex->Lock();
-    //log_info ("tid=(%u) <Lock key=(%s) new", pthread_self(), key.c_str());
   }
 }
 
@@ -138,7 +134,6 @@ void RecordMutex::Unlock(const std::string &key) {
   mutex_.Lock();
   std::unordered_map<std::string, RefMutex *>::const_iterator it = records_.find(key);
   
-  //log_info ("tid=(%u) >Unlock key=(%s) new, map_size=%u --", pthread_self(), key.c_str(), records_.size());
   if (it != records_.end()) {
     RefMutex *ref_mutex = it->second;
 
@@ -150,7 +145,6 @@ void RecordMutex::Unlock(const std::string &key) {
   }
 
   mutex_.Unlock();
-  //log_info ("tid=(%u) <Unlock key=(%s) new", pthread_self(), key.c_str());
 }
 
 }
