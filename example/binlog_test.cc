@@ -7,7 +7,10 @@ using namespace slash;
 
 Binlog *log;
 
+#define UNUSED(arg) ((void)arg)
+
 void* Append(void *arg) {
+  UNUSED(arg);
   int i = 0;
   while (true) {
     std::string item = "item" + std::to_string(i++);
@@ -15,9 +18,11 @@ void* Append(void *arg) {
     printf ("+ Append (%s) return %s\n", item.c_str(), s.ToString().c_str());
     sleep(1);
   }
+  return NULL;
 }
 
 void* Reader(void *arg) {
+  UNUSED(arg);
   int *id = (int *)arg;
   BinlogReader* reader = log->NewBinlogReader(0, 0);
 
@@ -27,10 +32,11 @@ void* Reader(void *arg) {
     if (s.ok()) {
       printf ("- Reader %u: get (%s)\n", *id, str.c_str());
     } else {
-      printf ("- Reader %d: %s\n", pthread_self(), s.ToString().c_str());
+      printf ("- Reader %lu: %s\n", pthread_self(), s.ToString().c_str());
     }
     sleep(1);
   }
+  return NULL;
 }
 
 int main() {
