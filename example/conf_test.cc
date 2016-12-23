@@ -17,6 +17,7 @@ int main()
   b.SetConfStr("pidfile", "./anan.pid");
   b.WriteBack();
   b.DumpConf();
+  b.WriteSampleConf();
 
   return 0;
 }

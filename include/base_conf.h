@@ -37,6 +37,8 @@ public:
   void DumpConf() const;
   bool WriteBack();
 
+  void WriteSampleConf() const;
+
 private:
   std::string path_;
 

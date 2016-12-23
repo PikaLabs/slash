@@ -212,11 +212,27 @@ bool BaseConf::WriteBack() {
       write_file->Append(item_[i].value);
     }
   }
-  // write_file->Close();
   DeleteFile(path_);
   RenameFile(tmp_path, path_);
   delete write_file;
   return true;
+}
+
+void BaseConf::WriteSampleConf() const {
+  WritableFile *write_file;
+  std::string sample_path = path_ + ".sample";
+  Status ret = NewWritableFile(sample_path, &write_file);
+  std::string tmp;
+  for (int i = 0; i < item_.size(); i++) {
+    if (item_[i].type == kConf) {
+      tmp = item_[i].name + " :\n";
+      write_file->Append(tmp);
+    } else {
+      write_file->Append(item_[i].value);
+    }
+  }
+  delete write_file;
+  return;
 }
 
 }   // namespace slash
