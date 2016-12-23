@@ -6,14 +6,13 @@
 #ifndef INCLUDE_BASE_CONF_H_
 #define INCLUDE_BASE_CONF_H_
 
-#include "stdlib.h"
-#include "stdio.h"
-#include "slash_define.h"
-
 #include <string>
 #include <vector>
 
-#define CONF_ITEM_LEN 1024
+#include "stdlib.h"
+#include "stdio.h"
+
+#include "slash_define.h"
 
 namespace slash {
 
@@ -36,36 +35,12 @@ public:
 
   void DumpConf() const;
   bool WriteBack();
-
   void WriteSampleConf() const;
 
 private:
-  std::string path_;
 
-  enum ConfType {
-    kConf = 0,
-    kComment = 1,
-  };
-
-  struct ConfItem {
-    ConfType type; // 0 means conf, 1 means comment
-    std::string name;
-    std::string value;
-    ConfItem(ConfType t, const std::string &v) :
-      type(t),
-      name(""),
-      value(v)
-    { }
-    ConfItem(ConfType t, const std::string &n, const std::string &v) :
-      type(t),
-      name(n),
-      value(v)
-    {}
-  };
-
-
-  std::vector<ConfItem> item_;
-  std::vector<ConfItem>::iterator iter;
+  struct Rep;
+  Rep* rep_;
 
   /*
    * No copy && no assign operator
