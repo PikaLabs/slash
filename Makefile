@@ -22,7 +22,8 @@ LIBRARY = libslash.a
 OUTPUT_LIB = $(OUTPUT)/lib/$(LIBRARY)
 
 TESTS = \
-  $(TESTS_DIR)/slash_string_test
+  $(TESTS_DIR)/slash_string_test \
+  $(TESTS_DIR)/slash_binlog_test
 
 .PHONY: all clean check
 
@@ -70,4 +71,7 @@ $(TESTS_DIR):
 	mkdir $@
 
 $(TESTS_DIR)/slash_string_test: $(SRC_DIR)/slash_string_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $^ -o $@ 
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+$(TESTS_DIR)/slash_binlog_test: $(SRC_DIR)/slash_binlog_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $^ -o $@

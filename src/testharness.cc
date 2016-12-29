@@ -65,28 +65,5 @@ int RunAllTests() {
   return 0;
 }
 
-int RandomSeed() {
-  const char* env = getenv("TEST_RANDOM_SEED");
-  int result = (env != NULL ? atoi(env) : 301);
-  if (result <= 0) {
-    result = 301;
-  }
-  return result;
-}
-
-int GetTestDirectory(std::string *result) {
-  const char* env = getenv("TEST_TMPDIR");
-  if (env && env[0] != '\0') {
-    *result = env;
-  } else {
-    char buf[100];
-    snprintf(buf, sizeof(buf), "/tmp/slashtest-%d", int(geteuid()));
-    *result = buf;
-  }
-  // Directory may already exist
-  CreateDir(*result);
-  return 0;
-}
-
 }  // namespace test
 }  // namespace slash
