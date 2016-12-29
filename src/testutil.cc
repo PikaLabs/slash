@@ -24,8 +24,6 @@ int GetTestDirectory(std::string *result) {
     snprintf(buf, sizeof(buf), "/tmp/slashtest-%d", int(geteuid()));
     *result = buf;
   }
-  // Directory may already exist
-  CreateDir(*result);
   return 0;
 }
 

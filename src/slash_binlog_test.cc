@@ -18,8 +18,8 @@ class BinlogTest {
   BinlogTest()
     : log_(NULL),
       reader_(NULL) {
-    DeleteDirIfExist(tmpdir_);
     GetTestDirectory(&tmpdir_);
+    DeleteDirIfExist(tmpdir_);
     ASSERT_OK(Binlog::Open(tmpdir_, &log_));
   }
   ~BinlogTest() {

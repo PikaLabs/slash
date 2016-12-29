@@ -23,7 +23,8 @@ OUTPUT_LIB = $(OUTPUT)/lib/$(LIBRARY)
 
 TESTS = \
   $(TESTS_DIR)/slash_string_test \
-  $(TESTS_DIR)/slash_binlog_test
+  $(TESTS_DIR)/slash_binlog_test \
+  $(TESTS_DIR)/base_conf_test
 
 .PHONY: all clean check
 
@@ -74,4 +75,7 @@ $(TESTS_DIR)/slash_string_test: $(SRC_DIR)/slash_string_test.o $(OUTPUT_LIB) $(T
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 $(TESTS_DIR)/slash_binlog_test: $(SRC_DIR)/slash_binlog_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+$(TESTS_DIR)/base_conf_test: $(SRC_DIR)/base_conf_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
