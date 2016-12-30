@@ -112,7 +112,6 @@ Status BinlogImpl::Recover() {
   pro_num_ = version_->pro_num_;
   std::string profile = NewFileName(path_ + kBinlogPrefix, pro_num_);
   if (exist_flag) {
-    log_info("Binlog: Find the exist file.");
     s = AppendWritableFile(profile, &queue_, version_->pro_offset_);
     if (!s.ok()) {
       return s;
@@ -124,7 +123,6 @@ Status BinlogImpl::Recover() {
     //mem->RecoverFromFile(profile);
     //memtables_[pro_num_] = mem;
   } else {
-    log_info("Binlog: Manifest file not exist, we create a new one.");
     s = NewWritableFile(profile, &queue_);
     if (!s.ok()) {
       return s;
@@ -357,14 +355,12 @@ BinlogReader* BinlogImpl::NewBinlogReader(uint32_t filenum, uint64_t offset) {
   uint64_t cur_offset = 0;
   GetProducerStatus(&cur_filenum, &cur_offset);
   if (cur_filenum < filenum || (cur_filenum == filenum && cur_offset < offset)) {
-    log_info("invalid binlog offset (%u,%llu)", filenum, offset);
     return NULL;
   }
 
   std::string confile = NewFileName(path_ + kBinlogPrefix, filenum);
   if (!slash::FileExists(confile)) {
     // Not found binlog specified by filenum
-    log_info("Not found binlog%d", filenum);
     return NULL;
   }
 
@@ -552,15 +548,12 @@ Status BinlogReaderImpl::ReadRecord(std::string &scratch) {
 
   while (!should_exit_) {
     log_->GetProducerStatus(&pro_num, &pro_offset);
-    log_info("GetProducerStatus num=%u, offset=%llu\n", pro_num, pro_offset);
     if (filenum_ == pro_num && offset_ == pro_offset) {
-      log_info("No more data, will sleep.\n", pro_num, pro_offset);
       usleep(10000);
       continue;
     }
 
     s = Consume(scratch);
-    log_info("Consume %s\n", s.ToString().c_str());
     if (s.IsEndFile()) {
       std::string confile = NewFileName(path_ + kBinlogPrefix, filenum_ + 1);
 

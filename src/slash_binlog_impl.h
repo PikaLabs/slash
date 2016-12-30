@@ -20,9 +20,6 @@ namespace slash {
 
 class Version;
 class BinlogReader;
-//class MemTable;
-
-//std::string NewFileName(const std::string name, const uint32_t current);
 
 // SyncPoint is a file number and an offset;
 
