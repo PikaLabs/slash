@@ -35,7 +35,7 @@ BASE_OBJS += $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(patsubst %.cc,%.o,$(BASE_OBJS))
 
 
-all: $(OUTPUT_LIB) example
+all: $(OUTPUT_LIB)
 	@echo "Success, go, go, go..."
 
 $(OUTPUT_LIB): $(LIBRARY)
@@ -48,9 +48,6 @@ $(OUTPUT_LIB): $(LIBRARY)
 $(LIBRARY): $(OBJS)
 	rm -rf $@
 	ar -rcs $@ $(OBJS)
-
-example: $(OUTPUT_LIB)
-	make -C example __PERF=$(__PERF)
 
 $(OBJECT): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) -Wl,-Bdynamic $(LIBS)
