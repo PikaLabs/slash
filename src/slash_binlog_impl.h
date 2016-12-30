@@ -148,14 +148,16 @@ class BinlogReaderImpl : public BinlogReader {
   virtual Status ReadRecord(std::string &record);
 
  private:
-  friend class BinlogReader;
+  friend class BinlogImpl;
 
   //Status Parse(std::string &scratch);
   Status Consume(std::string &scratch);
   unsigned int ReadPhysicalRecord(Slice *fragment);
 
-  uint64_t GetNext(bool &is_error);
-  int Trim();
+  // Tirm offset to first record behind offered offset.
+  Status Trim();
+  // Return next record end offset in a block, store in result if error encounted.
+  uint64_t GetNext(Status &result);
 
   Binlog* log_;
   std::string path_;

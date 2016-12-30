@@ -1,3 +1,8 @@
+// Copyright (c) 2015-present, Qihoo, Inc.  All rights reserved.
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree. An additional grant
+// of patent rights can be found in the PATENTS file in the same directory.
+
 /*
  * Copyright (c) 2009-2012, Salvatore Sanfilippo <antirez at gmail dot com>
  * All rights reserved.
@@ -32,8 +37,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <limits.h>
 #include <math.h>
+#include <limits.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <float.h>
@@ -589,119 +594,6 @@ std::string ToRead(const std::string& str) {
   return read;
 }
 
-#ifdef UTIL_TEST_MAIN
-#include <assert.h>
-
-void test_string2ll(void) {
-    char buf[32];
-    long long v;
-
-    /* May not start with +. */
-    strcpy(buf,"+1");
-    assert(string2ll(buf,strlen(buf),&v) == 0);
-
-    /* Leading space. */
-    strcpy(buf," 1");
-    assert(string2ll(buf,strlen(buf),&v) == 0);
-
-    /* Trailing space. */
-    strcpy(buf,"1 ");
-    assert(string2ll(buf,strlen(buf),&v) == 0);
-
-    /* May not start with 0. */
-    strcpy(buf,"01");
-    assert(string2ll(buf,strlen(buf),&v) == 0);
-
-    strcpy(buf,"-1");
-    assert(string2ll(buf,strlen(buf),&v) == 1);
-    assert(v == -1);
-
-    strcpy(buf,"0");
-    assert(string2ll(buf,strlen(buf),&v) == 1);
-    assert(v == 0);
-
-    strcpy(buf,"1");
-    assert(string2ll(buf,strlen(buf),&v) == 1);
-    assert(v == 1);
-
-    strcpy(buf,"99");
-    assert(string2ll(buf,strlen(buf),&v) == 1);
-    assert(v == 99);
-
-    strcpy(buf,"-99");
-    assert(string2ll(buf,strlen(buf),&v) == 1);
-    assert(v == -99);
-
-    strcpy(buf,"-9223372036854775808");
-    assert(string2ll(buf,strlen(buf),&v) == 1);
-    assert(v == LLONG_MIN);
-
-    strcpy(buf,"-9223372036854775809"); /* overflow */
-    assert(string2ll(buf,strlen(buf),&v) == 0);
-
-    strcpy(buf,"9223372036854775807");
-    assert(string2ll(buf,strlen(buf),&v) == 1);
-    assert(v == LLONG_MAX);
-
-    strcpy(buf,"9223372036854775808"); /* overflow */
-    assert(string2ll(buf,strlen(buf),&v) == 0);
-}
-
-void test_string2l(void) {
-    char buf[32];
-    long v;
-
-    /* May not start with +. */
-    strcpy(buf,"+1");
-    assert(string2l(buf,strlen(buf),&v) == 0);
-
-    /* May not start with 0. */
-    strcpy(buf,"01");
-    assert(string2l(buf,strlen(buf),&v) == 0);
-
-    strcpy(buf,"-1");
-    assert(string2l(buf,strlen(buf),&v) == 1);
-    assert(v == -1);
-
-    strcpy(buf,"0");
-    assert(string2l(buf,strlen(buf),&v) == 1);
-    assert(v == 0);
-
-    strcpy(buf,"1");
-    assert(string2l(buf,strlen(buf),&v) == 1);
-    assert(v == 1);
-
-    strcpy(buf,"99");
-    assert(string2l(buf,strlen(buf),&v) == 1);
-    assert(v == 99);
-
-    strcpy(buf,"-99");
-    assert(string2l(buf,strlen(buf),&v) == 1);
-    assert(v == -99);
-
-#if LONG_MAX != LLONG_MAX
-    strcpy(buf,"-2147483648");
-    assert(string2l(buf,strlen(buf),&v) == 1);
-    assert(v == LONG_MIN);
-
-    strcpy(buf,"-2147483649"); /* overflow */
-    assert(string2l(buf,strlen(buf),&v) == 0);
-
-    strcpy(buf,"2147483647");
-    assert(string2l(buf,strlen(buf),&v) == 1);
-    assert(v == LONG_MAX);
-
-    strcpy(buf,"2147483648"); /* overflow */
-    assert(string2l(buf,strlen(buf),&v) == 0);
-#endif
-}
-
-int main(int argc, char **argv) {
-    test_string2ll();
-    test_string2l();
-    return 0;
-}
-#endif
 bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port) {
   if (ip_port.empty()) {
     return false;
@@ -720,5 +612,33 @@ bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port) {
   return true;
 }
 
+// Trim charlist
+std::string StringTrim(std::string ori, const std::string charlist) {
+  if (ori.empty())
+    return ori;
+
+  int pos = 0, rpos = ori.size() - 1;
+  while (pos < ori.size()) {
+    bool meet = false;
+    for (char c : charlist)
+      if (ori[pos] == c) {
+        meet = true;
+        break;
+      }
+    if (!meet) break;
+    ++pos;
+  }
+  while (rpos >= 0) {
+    bool meet = false;
+    for (char c : charlist)
+      if (ori[rpos] == c) {
+        meet = true;
+        break;
+      }
+    if (!meet) break;
+    --rpos;
+  }
+  return ori.substr(pos, rpos - pos + 1);
 }
 
+}  // namespace slash

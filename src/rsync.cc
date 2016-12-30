@@ -132,4 +132,4 @@ int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& r
   return ret;
 }
 
-}
+}  // namespace slash

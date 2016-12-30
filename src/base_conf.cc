@@ -4,6 +4,7 @@
 // of patent rights can be found in the PATENTS file in the same directory.
 
 #include "include/base_conf.h"
+#include "include/slash_string.h"
 
 #include <sys/stat.h>
 
@@ -149,10 +150,10 @@ bool BaseConf::GetConfStrVec(const std::string &name, std::vector<std::string> *
       while (true) {
         pos = val_str.find(",");
         if (pos == std::string::npos) {
-          value->push_back(val_str);
+          value->push_back(StringTrim(val_str));
           break;
         }
-        value->push_back(val_str.substr(0, pos));
+        value->push_back(StringTrim(val_str.substr(0, pos)));
         val_str = val_str.substr(pos+1);
       }
       return true;

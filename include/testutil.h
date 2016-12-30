@@ -6,8 +6,9 @@
 namespace slash {
 
 extern std::string RandomString(const int len);
+extern int RandomSeed();
+extern int GetTestDirectory(std::string *result);
 
-extern std::string RandomKey();
 };  // namespace slash
 
 

@@ -49,6 +49,7 @@ class Binlog {
 class BinlogReader {
  public:
   BinlogReader() { }
+  virtual ~BinlogReader() { }
 
   virtual Status ReadRecord(std::string &record) = 0;
   //bool ReadRecord(Slice* record, std::string* scratch) = 0;
