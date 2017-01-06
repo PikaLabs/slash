@@ -68,6 +68,9 @@ class Status {
   // Returns true iff the status is Incomplete 
   bool IsIncomplete() const { return code() == kIncomplete; }
 
+  // Returns true iff the status is Incomplete 
+  bool IsInvalidArgument() const { return code() == kInvalidArgument; }
+
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
   std::string ToString() const;
