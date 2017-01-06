@@ -1,3 +1,8 @@
+// Copyright (c) 2015-present, Qihoo, Inc.  All rights reserved.
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree. An additional grant
+// of patent rights can be found in the PATENTS file in the same directory.
+
 /*
  * Copyright (c) 2009-2012, Salvatore Sanfilippo <antirez at gmail dot com>
  * All rights reserved.
@@ -50,5 +55,9 @@ std::string& StringToLower(std::string& ori);
 std::string IpPortString(const std::string& ip, int port);
 std::string ToRead(const std::string& str);
 bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port);
-}
-#endif
+std::string StringTrim(std::string ori, const std::string charlist = " ");
+
+
+}  // namespace slash
+
+#endif  // __SLASH_STRING_H

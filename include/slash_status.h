@@ -47,29 +47,36 @@ class Status {
     return Status(kComplete, msg, msg2);
   }
 
-  // Returns true iff the status indicates success.
+  static Status Timeout(const Slice& msg, const Slice& msg2 = Slice()) {
+    return Status(kComplete, msg, msg2);
+  }
+
+  // Returns true if the status indicates success.
   bool ok() const { return (state_ == NULL); }
 
-  // Returns true iff the status indicates a NotFound error.
+  // Returns true if the status indicates a NotFound error.
   bool IsNotFound() const { return code() == kNotFound; }
 
-  // Returns true iff the status indicates a Corruption error.
+  // Returns true if the status indicates a Corruption error.
   bool IsCorruption() const { return code() == kCorruption; }
 
-  // Returns true iff the status indicates an IOError.
+  // Returns true if the status indicates an IOError.
   bool IsIOError() const { return code() == kIOError; }
 
-  // Returns true iff the status indicates an EOF.
+  // Returns true if the status indicates an EOF.
   bool IsEndFile() const { return code() == kEndFile; }
   
-  // Returns true iff the status is complete.
+  // Returns true if the status is complete.
   bool IsComplete() const { return code() == kComplete; }
 
-  // Returns true iff the status is Incomplete 
+  // Returns true if the status is Incomplete 
   bool IsIncomplete() const { return code() == kIncomplete; }
 
   // Returns true iff the status is Incomplete 
   bool IsInvalidArgument() const { return code() == kInvalidArgument; }
+  
+  // Returns true if the status is Incomplete 
+  bool IsTimeout() const { return code() == kTimeout; }
 
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
@@ -92,7 +99,8 @@ class Status {
     kIOError = 5,
     kEndFile = 6,
     kIncomplete = 7,
-    kComplete = 8
+    kComplete = 8,
+    kTimeout = 9
   };
 
   Code code() const {

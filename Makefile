@@ -8,7 +8,7 @@ endif
 
 SRC_DIR = ./src/
 OUTPUT = ./output/
-
+TESTS_DIR = ./tests/
 
 INCLUDE_PATH = -I./ \
 							 -I./include/
@@ -19,9 +19,14 @@ LIB_PATH = -L./ \
 LIBS = -lpthread
 
 LIBRARY = libslash.a
+OUTPUT_LIB = $(OUTPUT)/lib/$(LIBRARY)
 
+TESTS = \
+  $(TESTS_DIR)/slash_string_test \
+  $(TESTS_DIR)/slash_binlog_test \
+  $(TESTS_DIR)/base_conf_test
 
-.PHONY: all clean
+.PHONY: all clean check
 
 
 BASE_OBJS := $(wildcard $(SRC_DIR)/*.cc)
@@ -30,20 +35,19 @@ BASE_OBJS += $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(patsubst %.cc,%.o,$(BASE_OBJS))
 
 
-all: $(LIBRARY)
+all: $(OUTPUT_LIB)
 	@echo "Success, go, go, go..."
 
-$(LIBRARY): $(OBJS)
+$(OUTPUT_LIB): $(LIBRARY)
 	rm -rf $(OUTPUT)
-	mkdir $(OUTPUT)
-	mkdir $(OUTPUT)/include
-	mkdir $(OUTPUT)/lib
+	mkdir -p $(OUTPUT)/include
+	mkdir -p $(OUTPUT)/lib
+	cp -r ./include $(OUTPUT)/
+	mv $< $(OUTPUT)/lib/
+
+$(LIBRARY): $(OBJS)
 	rm -rf $@
 	ar -rcs $@ $(OBJS)
-	cp -r ./include $(OUTPUT)/
-	mv $@ $(OUTPUT)/lib/
-	make -C example __PERF=$(__PERF)
-
 
 $(OBJECT): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCLUDE_PATH) $(LIB_PATH) -Wl,-Bdynamic $(LIBS)
@@ -56,3 +60,19 @@ clean:
 	rm -rf $(SRC_DIR)/*.o
 	rm -rf $(OUTPUT)/*
 	rm -rf $(OUTPUT)
+	rm -rf $(TESTS_DIR)
+
+check: $(OUTPUT_LIB) $(TESTS_DIR) $(TESTS)
+	for t in $(notdir $(TESTS)); do echo "***** Running $$t"; $(TESTS_DIR)/$$t || exit 1; done
+
+$(TESTS_DIR):
+	mkdir $@
+
+$(TESTS_DIR)/slash_string_test: $(SRC_DIR)/slash_string_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+$(TESTS_DIR)/slash_binlog_test: $(SRC_DIR)/slash_binlog_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+$(TESTS_DIR)/base_conf_test: $(SRC_DIR)/base_conf_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $^ -o $@

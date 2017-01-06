@@ -1,5 +1,5 @@
-#include "base_conf.h"
-#include "xdebug.h"
+#include "include/base_conf.h"
+#include "include/xdebug.h"
 
 using namespace slash;
 
@@ -17,6 +17,7 @@ int main()
   b.SetConfStr("pidfile", "./anan.pid");
   b.WriteBack();
   b.DumpConf();
+  b.WriteSampleConf();
 
   return 0;
 }

@@ -13,4 +13,7 @@ notifications:
   email:
     - chenzongzhi@360.cn
 
-script: make
+script:
+  - make
+  - make check
+  - make -C example
