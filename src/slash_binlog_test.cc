@@ -94,6 +94,8 @@ TEST(BinlogTest, ProducerStatusOp) {
 
 }  // namespace slash
 
+/**
 int main() {
   return slash::test::RunAllTests();
 }
+*/
