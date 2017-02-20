@@ -60,6 +60,9 @@ class Status {
   // Returns true if the status indicates a Corruption error.
   bool IsCorruption() const { return code() == kCorruption; }
 
+  // Returns true if the status indicates a NotSupported error.
+  bool IsNotSupported() const { return code() == kNotSupported; }
+
   // Returns true if the status indicates an IOError.
   bool IsIOError() const { return code() == kIOError; }
 
