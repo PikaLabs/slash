@@ -69,10 +69,12 @@ inline uint64_t DecodeFixed64(const char* ptr) {
 
 inline void GetFixed32(std::string* dst, uint32_t *value) {
   *value = DecodeFixed32(dst->data());
+  dst->erase(0, sizeof(uint32_t));
 }
 
 inline void GetFixed64(std::string* dst, uint64_t *value) {
   *value = DecodeFixed64(dst->data());
+  dst->erase(0, sizeof(uint64_t));
 }
 
 // Internal routine for use by fallback path of GetVarint32Ptr
