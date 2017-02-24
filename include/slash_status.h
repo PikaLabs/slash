@@ -48,7 +48,11 @@ class Status {
   }
 
   static Status Timeout(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(kComplete, msg, msg2);
+    return Status(kTimeout, msg, msg2);
+  }
+
+  static Status AuthFailed(const Slice& msg, const Slice& msg2 = Slice()) {
+    return Status(kAuthFailed, msg, msg2);
   }
 
   // Returns true if the status indicates success.
@@ -75,11 +79,14 @@ class Status {
   // Returns true if the status is Incomplete 
   bool IsIncomplete() const { return code() == kIncomplete; }
 
-  // Returns true iff the status is Incomplete 
+  // Returns true iff the status is InvalidArgument 
   bool IsInvalidArgument() const { return code() == kInvalidArgument; }
   
-  // Returns true if the status is Incomplete 
+  // Returns true if the status is Timeout
   bool IsTimeout() const { return code() == kTimeout; }
+
+  // Returns true if the status is AuthFailed
+  bool IsAuthFailed() const { return code() == kAuthFailed; }
 
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
@@ -103,7 +110,8 @@ class Status {
     kEndFile = 6,
     kIncomplete = 7,
     kComplete = 8,
-    kTimeout = 9
+    kTimeout = 9,
+    kAuthFailed = 10
   };
 
   Code code() const {

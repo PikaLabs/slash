@@ -69,6 +69,9 @@ std::string Status::ToString() const {
     case kTimeout:
       type = "Timeout: ";
       break;
+    case kAuthFailed:
+      type = "AuthFailed: ";
+      break;
     default:
       snprintf(tmp, sizeof(tmp), "Unknown code(%d): ",
           static_cast<int>(code()));
