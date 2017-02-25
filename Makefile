@@ -8,10 +8,12 @@ endif
 
 SRC_DIR = ./src/
 OUTPUT = ./output/
-TESTS_DIR = ./tests/
+TESTS_DIR = $(SRC_DIR)/tests/
 
 INCLUDE_PATH = -I./ \
-							 -I./include/
+							 -I./include/ \
+							 -I$(SRC_DIR) \
+							 -I$(TESTS_DIR)
 
 LIB_PATH = -L./ \
 
@@ -60,19 +62,19 @@ clean:
 	rm -rf $(SRC_DIR)/*.o
 	rm -rf $(OUTPUT)/*
 	rm -rf $(OUTPUT)
-	rm -rf $(TESTS_DIR)
+	rm -f $(TESTS_DIR)/*.o
+	rm -f $(TESTS)
 
-check: $(OUTPUT_LIB) $(TESTS_DIR) $(TESTS)
+check: $(OUTPUT_LIB) $(TESTS)
 	for t in $(notdir $(TESTS)); do echo "***** Running $$t"; $(TESTS_DIR)/$$t || exit 1; done
 
-$(TESTS_DIR):
-	mkdir $@
+TESTHARNESS = $(TESTS_DIR)/testharness.cc
 
-$(TESTS_DIR)/slash_string_test: $(SRC_DIR)/slash_string_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+$(TESTS_DIR)/slash_string_test: $(TESTS_DIR)/slash_string_test.cc $(TESTHARNESS) $(OUTPUT_LIB) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) $^ -o $@
 
-$(TESTS_DIR)/slash_binlog_test: $(SRC_DIR)/slash_binlog_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+$(TESTS_DIR)/slash_binlog_test: $(TESTS_DIR)/slash_binlog_test.cc $(TESTHARNESS) $(OUTPUT_LIB) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) $^ -o $@
 
-$(TESTS_DIR)/base_conf_test: $(SRC_DIR)/base_conf_test.o $(OUTPUT_LIB) $(TESTHARNESS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+$(TESTS_DIR)/base_conf_test: $(TESTS_DIR)/base_conf_test.cc $(TESTHARNESS) $(OUTPUT_LIB) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) $^ -o $@

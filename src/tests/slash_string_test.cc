@@ -128,8 +128,6 @@ TEST(StringTest, test_string2l) {
 
 }  // namespace slash
 
-/**
 int main() {
   return slash::test::RunAllTests();
 }
-*/

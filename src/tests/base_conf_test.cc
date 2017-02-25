@@ -80,8 +80,6 @@ TEST(BaseConfTest, WriteReadConf) {
 
 }  // namespace slash
 
-/**
 int main() {
   return slash::test::RunAllTests();
 }
-*/
