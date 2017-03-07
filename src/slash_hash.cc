@@ -145,6 +145,7 @@ class MD5 {
   void update(const char *buf, size_type length);
   MD5& finalize();
   std::string hexdigest() const;
+  std::string rawdigest() const;
   friend std::ostream& operator<<(std::ostream&, MD5 md5);
 
  private:
@@ -284,7 +285,7 @@ void SHA256::final(unsigned char *digest) {
   }
 }
 
-std::string sha256(std::string &input) {
+std::string sha256(const std::string &input, bool raw) {
   unsigned char digest[SHA256::DIGEST_SIZE];
   memset(digest,0,SHA256::DIGEST_SIZE);
 
@@ -293,6 +294,13 @@ std::string sha256(std::string &input) {
   ctx.update( (unsigned char*)input.c_str(), input.length());
   ctx.final(digest);
 
+  if (raw) {
+    std::string res;
+    for (unsigned int i = 0; i < SHA256::DIGEST_SIZE; ++i) {
+      res.append(1, digest[i]);
+    }
+    return res;
+  }
   char buf[2*SHA256::DIGEST_SIZE+1];
   buf[2*SHA256::DIGEST_SIZE] = 0;
   for (int i = 0; i < SHA256::DIGEST_SIZE; i++)
@@ -600,6 +608,16 @@ std::string MD5::hexdigest() const {
   return std::string(buf);
 }
 
+std::string MD5::rawdigest() const {
+  if (!finalized)
+    return "";
+  std::string res;
+  for (unsigned int i = 0; i < 16; ++i) {
+    res.append(1, digest[i]);
+  }
+  return res;
+}
+
 //////////////////////////////
 
 std::ostream& operator<<(std::ostream& out, MD5 md5) {
@@ -608,9 +626,12 @@ std::ostream& operator<<(std::ostream& out, MD5 md5) {
 
 //////////////////////////////
 
-std::string md5(const std::string &str) {
+std::string md5(const std::string &str, bool raw) {
   MD5 md5 = MD5(str);
 
+  if (raw) {
+    return md5.rawdigest();
+  }
   return md5.hexdigest();
 }
 

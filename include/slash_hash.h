@@ -80,8 +80,8 @@ documentation and/or software.
 
 namespace slash {
 
-std::string md5(const std::string &str);
-std::string sha256(std::string &input);
+std::string md5(const std::string &str, bool raw = false);
+std::string sha256(const std::string &input, bool raw = false);
 
 }  // namespace slash
 
