@@ -530,6 +530,19 @@ class PosixMmapFile : public WritableFile
     return s;
   }
 
+  virtual Status Trim(uint64_t target) {
+    if (!UnmapCurrentRegion()) {
+      return IOError(filename_, errno);
+    }
+
+    file_offset_ = target;
+
+    if (!MapNewRegion()) {
+      return IOError(filename_, errno);
+    }
+    return Status::OK();
+  }
+
   virtual uint64_t Filesize() {
     return write_len_ + file_offset_ + (dst_ - base_);
   }
@@ -542,144 +555,144 @@ RWFile::~RWFile() {
 class MmapRWFile : public RWFile
 {
  public:
-  MmapRWFile(const std::string& fname, int fd, size_t page_size)
-      : filename_(fname),
-      fd_(fd),
-      page_size_(page_size),
-      map_size_(Roundup(65536, page_size)),
-      base_(NULL) {
-        DoMapRegion();
-      }
+   MmapRWFile(const std::string& fname, int fd, size_t page_size)
+     : filename_(fname),
+     fd_(fd),
+     page_size_(page_size),
+     map_size_(Roundup(65536, page_size)),
+     base_(NULL) {
+       DoMapRegion();
+     }
 
-  ~MmapRWFile() {
-    if (fd_ >= 0) {
-      munmap(base_, map_size_);
-    }
-  }
+   ~MmapRWFile() {
+     if (fd_ >= 0) {
+       munmap(base_, map_size_);
+     }
+   }
 
-  bool DoMapRegion() {
-    if (ftruncate(fd_, map_size_) < 0) {
-      return false;
-    }
-    void* ptr = mmap(NULL, map_size_, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, 0);
-    if (ptr == MAP_FAILED) {
-      return false;
-    }
-    base_ = reinterpret_cast<char*>(ptr);
-    return true;
-  }
+   bool DoMapRegion() {
+     if (ftruncate(fd_, map_size_) < 0) {
+       return false;
+     }
+     void* ptr = mmap(NULL, map_size_, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, 0);
+     if (ptr == MAP_FAILED) {
+       return false;
+     }
+     base_ = reinterpret_cast<char*>(ptr);
+     return true;
+   }
 
-  char* GetData() { return base_; }
-  char* base() { return base_; }
+   char* GetData() { return base_; }
+   char* base() { return base_; }
 
  private:
-  static size_t Roundup(size_t x, size_t y) {
-    return ((x + y - 1) / y) * y;
-  }
-  std::string filename_;
-  int fd_;
-  size_t page_size_;
-  size_t map_size_;
-  char* base_;
+   static size_t Roundup(size_t x, size_t y) {
+     return ((x + y - 1) / y) * y;
+   }
+   std::string filename_;
+   int fd_;
+   size_t page_size_;
+   size_t map_size_;
+   char* base_;
 };
 
 class PosixRandomRWFile : public RandomRWFile {
  private:
-  const std::string filename_;
-  int fd_;
-  bool pending_sync_;
-  bool pending_fsync_;
-  //bool fallocate_with_keep_size_;
+   const std::string filename_;
+   int fd_;
+   bool pending_sync_;
+   bool pending_fsync_;
+   //bool fallocate_with_keep_size_;
 
  public:
-  PosixRandomRWFile(const std::string& fname, int fd)
-      : filename_(fname),
-        fd_(fd),
-        pending_sync_(false),
-        pending_fsync_(false) {
-    //fallocate_with_keep_size_ = options.fallocate_with_keep_size;
-  }
+   PosixRandomRWFile(const std::string& fname, int fd)
+     : filename_(fname),
+     fd_(fd),
+     pending_sync_(false),
+     pending_fsync_(false) {
+       //fallocate_with_keep_size_ = options.fallocate_with_keep_size;
+     }
 
-  ~PosixRandomRWFile() {
-    if (fd_ >= 0) {
-      Close();
-    }
-  }
+   ~PosixRandomRWFile() {
+     if (fd_ >= 0) {
+       Close();
+     }
+   }
 
-  virtual Status Write(uint64_t offset, const Slice& data) override {
-    const char* src = data.data();
-    size_t left = data.size();
-    Status s;
-    pending_sync_ = true;
-    pending_fsync_ = true;
+   virtual Status Write(uint64_t offset, const Slice& data) override {
+     const char* src = data.data();
+     size_t left = data.size();
+     Status s;
+     pending_sync_ = true;
+     pending_fsync_ = true;
 
-    while (left != 0) {
-      ssize_t done = pwrite(fd_, src, left, offset);
-      if (done < 0) {
-        if (errno == EINTR) {
-          continue;
-        }
-        return IOError(filename_, errno);
-      }
+     while (left != 0) {
+       ssize_t done = pwrite(fd_, src, left, offset);
+       if (done < 0) {
+         if (errno == EINTR) {
+         continue;
+       }
+       return IOError(filename_, errno);
+     }
 
-      left -= done;
-      src += done;
-      offset += done;
-    }
+     left -= done;
+     src += done;
+     offset += done;
+   }
 
-    return Status::OK();
-  }
+   return Status::OK();
+ }
 
-  virtual Status Read(uint64_t offset, size_t n, Slice* result,
-                      char* scratch) const override {
-    Status s;
-    ssize_t r = -1;
-    size_t left = n;
-    char* ptr = scratch;
-    while (left > 0) {
-      r = pread(fd_, ptr, left, static_cast<off_t>(offset));
-      if (r <= 0) {
-        if (errno == EINTR) {
-          continue;
-        }
-        break;
-      }
-      ptr += r;
-      offset += r;
-      left -= r;
-    }
-    *result = Slice(scratch, (r < 0) ? 0 : n - left);
-    if (r < 0) {
-      s = IOError(filename_, errno);
-    }
-    return s;
-  }
+ virtual Status Read(uint64_t offset, size_t n, Slice* result,
+                     char* scratch) const override {
+   Status s;
+   ssize_t r = -1;
+   size_t left = n;
+   char* ptr = scratch;
+   while (left > 0) {
+     r = pread(fd_, ptr, left, static_cast<off_t>(offset));
+     if (r <= 0) {
+       if (errno == EINTR) {
+         continue;
+       }
+       break;
+     }
+     ptr += r;
+     offset += r;
+     left -= r;
+   }
+   *result = Slice(scratch, (r < 0) ? 0 : n - left);
+   if (r < 0) {
+     s = IOError(filename_, errno);
+   }
+   return s;
+ }
 
-  virtual Status Close() override {
-    Status s = Status::OK();
-    if (fd_ >= 0 && close(fd_) < 0) {
-      s = IOError(filename_, errno);
-    }
-    fd_ = -1;
-    return s;
-  }
+ virtual Status Close() override {
+   Status s = Status::OK();
+   if (fd_ >= 0 && close(fd_) < 0) {
+     s = IOError(filename_, errno);
+   }
+   fd_ = -1;
+   return s;
+ }
 
-  virtual Status Sync() override {
-    if (pending_sync_ && fdatasync(fd_) < 0) {
-      return IOError(filename_, errno);
-    }
-    pending_sync_ = false;
-    return Status::OK();
-  }
+ virtual Status Sync() override {
+   if (pending_sync_ && fdatasync(fd_) < 0) {
+     return IOError(filename_, errno);
+   }
+   pending_sync_ = false;
+   return Status::OK();
+ }
 
-  virtual Status Fsync() override {
-    if (pending_fsync_ && fsync(fd_) < 0) {
-      return IOError(filename_, errno);
-    }
-    pending_fsync_ = false;
-    pending_sync_ = false;
-    return Status::OK();
-  }
+ virtual Status Fsync() override {
+   if (pending_fsync_ && fsync(fd_) < 0) {
+     return IOError(filename_, errno);
+   }
+   pending_fsync_ = false;
+   pending_sync_ = false;
+   return Status::OK();
+ }
 
 //  virtual Status Allocate(off_t offset, off_t len) override {
 //    TEST_KILL_RANDOM(rocksdb_kill_odds);

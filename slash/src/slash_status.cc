@@ -60,6 +60,18 @@ std::string Status::ToString() const {
     case kEndFile:
       type = "End file: ";
       break;
+    case kIncomplete:
+      type = "InComplete: ";
+      break;
+    case kComplete:
+      type = "Complete: ";
+      break;
+    case kTimeout:
+      type = "Timeout: ";
+      break;
+    case kAuthFailed:
+      type = "AuthFailed: ";
+      break;
     default:
       snprintf(tmp, sizeof(tmp), "Unknown code(%d): ",
           static_cast<int>(code()));
