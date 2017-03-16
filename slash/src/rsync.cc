@@ -2,9 +2,9 @@
 #include <sstream>
 #include <string>
 
-#include "env.h"
-#include "rsync.h"
-#include "xdebug.h"
+#include "include/env.h"
+#include "include/rsync.h"
+#include "include/xdebug.h"
 
 namespace slash {
 // Clean files for rsync info, such as the lock, log, pid, conf file

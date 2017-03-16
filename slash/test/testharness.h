@@ -10,11 +10,10 @@
 #ifndef SLASH_TESTHARNESS_H_
 #define SLASH_TESTHARNESS_H_
 
-#include "slash_status.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
+#include "include/slash_status.h"
 
 namespace slash {
 namespace test {

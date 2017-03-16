@@ -7,11 +7,10 @@ else
 endif
 
 SRC_DIR = ./src/
-OUTPUT = ./output/
-TESTS_DIR = ./tests/
+LIB_DIR = ./lib
+TEST_DIR = ./test/
 
-INCLUDE_PATH = -I./ \
-							 -I./include/
+INCLUDE_PATH = -I./
 
 LIB_PATH = -L./ \
 
@@ -19,12 +18,12 @@ LIB_PATH = -L./ \
 LIBS = -lpthread
 
 LIBRARY = libslash.a
-OUTPUT_LIB = $(OUTPUT)/lib/$(LIBRARY)
+OUTPUT_LIB = $(LIB_DIR)/$(LIBRARY)
 
 TESTS = \
-  $(TESTS_DIR)/slash_string_test \
-  $(TESTS_DIR)/slash_binlog_test \
-  $(TESTS_DIR)/base_conf_test
+  $(TEST_DIR)/slash_string_test \
+  $(TEST_DIR)/slash_binlog_test \
+  $(TEST_DIR)/base_conf_test
 
 .PHONY: all clean check
 
@@ -39,11 +38,8 @@ all: $(OUTPUT_LIB)
 	@echo "Success, go, go, go..."
 
 $(OUTPUT_LIB): $(LIBRARY)
-	rm -rf $(OUTPUT)
-	mkdir -p $(OUTPUT)/include
-	mkdir -p $(OUTPUT)/lib
-	cp -r ./include $(OUTPUT)/
-	mv $< $(OUTPUT)/lib/
+	mkdir -p $(LIB_DIR)
+	mv $< $(LIB_DIR)
 
 $(LIBRARY): $(OBJS)
 	rm -rf $@
@@ -58,8 +54,7 @@ $(OBJS): %.o : %.cc
 clean: 
 	make -C example clean
 	rm -rf $(SRC_DIR)/*.o
-	rm -rf $(OUTPUT)/*
-	rm -rf $(OUTPUT)
+	rm -rf $(LIB_DIR)
 	rm -rf $(TESTS_DIR)
 
 check: $(OUTPUT_LIB) $(TESTS_DIR) $(TESTS)
