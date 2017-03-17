@@ -34,6 +34,7 @@ OBJS = $(patsubst %.cc,%.o,$(BASE_OBJS))
 
 
 all: $(OUTPUT_LIB)
+	make -C example 
 	@echo "Success, go, go, go..."
 
 $(OUTPUT_LIB): $(LIBRARY)

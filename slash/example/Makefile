@@ -10,12 +10,12 @@ SRC_DIR = ./
 OUTPUT = ./output
 
 LIB_PATH = -L../ \
-		   -L../output/lib/
+		   -L../lib/
 
 LIBS = -lslash \
 			 -lpthread
 
-INCLUDE_PATH = -I../output/
+INCLUDE_PATH = -I../
 
 .PHONY: all clean version
 
