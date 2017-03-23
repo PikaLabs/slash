@@ -9,8 +9,8 @@
 #include <assert.h>
 #include <string>
 
-#include "slash_status.h"
-#include "xdebug.h"
+#include "slash/include/slash_status.h"
+#include "slash/include/xdebug.h"
 //#include "slash_mutex.h"
 
 namespace slash {

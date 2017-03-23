@@ -10,7 +10,7 @@ SRC_DIR = ./src/
 LIB_DIR = ./lib
 TEST_DIR = ./test/
 
-INCLUDE_PATH = -I./
+INCLUDE_PATH = -I../
 LIB_PATH = -L./ \
 
 

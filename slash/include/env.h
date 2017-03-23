@@ -5,7 +5,7 @@
 #include <vector>
 #include <unistd.h>
 
-#include "slash_status.h"
+#include "slash/include/slash_status.h"
 
 namespace slash {
 

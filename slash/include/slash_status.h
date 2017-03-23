@@ -2,7 +2,7 @@
 #define SLASH_STATUS_H_
 
 #include <string>
-#include "slash_slice.h"
+#include "slash/include/slash_slice.h"
 
 namespace slash {
 

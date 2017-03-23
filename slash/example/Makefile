@@ -15,7 +15,7 @@ LIB_PATH = -L../ \
 LIBS = -lslash \
 			 -lpthread
 
-INCLUDE_PATH = -I../
+INCLUDE_PATH = -I../../
 
 .PHONY: all clean version
 

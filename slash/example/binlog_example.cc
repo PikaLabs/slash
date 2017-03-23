@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "include/slash_binlog.h"
-#include "include/xdebug.h"
+#include "slash/include/slash_binlog.h"
+#include "slash/include/xdebug.h"
 
 using namespace slash;
 

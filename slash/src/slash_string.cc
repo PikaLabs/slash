@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "include/fmacros.h"
+#include "slash/include/fmacros.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -55,7 +55,7 @@
 #include <dirent.h>
 #include <algorithm>
 
-#include "include/slash_string.h"
+#include "slash/include/slash_string.h"
 
 namespace slash {
 

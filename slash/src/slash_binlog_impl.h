@@ -11,10 +11,10 @@
 #include <string>
 #include <assert.h>
 
-#include "include/env.h"
-#include "include/slash_binlog.h"
-#include "include/slash_status.h"
-#include "include/slash_mutex.h"
+#include "slash/include/env.h"
+#include "slash/include/slash_binlog.h"
+#include "slash/include/slash_status.h"
+#include "slash/include/slash_mutex.h"
 
 namespace slash {
 

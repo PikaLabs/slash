@@ -3,7 +3,7 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include <stdio.h>
-#include "include/slash_status.h"
+#include "slash/include/slash_status.h"
 
 namespace slash {
 

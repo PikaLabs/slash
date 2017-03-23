@@ -12,7 +12,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 
-#include "slash_define.h"
+#include "slash/include/slash_define.h"
 
 namespace slash {
 

@@ -75,7 +75,7 @@
 #include <cstring>
 #include <fstream>
 #include <cstdio>
-#include "include/slash_hash.h"
+#include "slash/include/slash_hash.h"
 
 namespace slash {
 

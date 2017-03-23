@@ -1,5 +1,5 @@
-#include "include/base_conf.h"
-#include "include/xdebug.h"
+#include "slash/include/base_conf.h"
+#include "slash/include/xdebug.h"
 
 using namespace slash;
 

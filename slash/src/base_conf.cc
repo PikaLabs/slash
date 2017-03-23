@@ -3,15 +3,15 @@
 // LICENSE file in the root directory of this source tree. An additional grant
 // of patent rights can be found in the PATENTS file in the same directory.
 
-#include "include/base_conf.h"
-#include "include/slash_string.h"
+#include "slash/include/base_conf.h"
+#include "slash/include/slash_string.h"
 
 #include <sys/stat.h>
 
 #include <algorithm>
 
-#include "include/env.h"
-#include "include/xdebug.h"
+#include "slash/include/env.h"
+#include "slash/include/xdebug.h"
 
 namespace slash {
 

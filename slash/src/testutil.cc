@@ -1,9 +1,9 @@
-#include "include/testutil.h"
-#include "include/env.h"
+#include "slash/include/testutil.h"
+#include "slash/include/env.h"
 
 #include <string>
 
-#include "include/random.h"
+#include "slash/include/random.h"
 
 namespace slash {
 

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "include/slash_mutex.h"
+#include "slash/include/slash_mutex.h"
 
 using namespace slash;
 

@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
 
-#include "include/slash_hash.h"
+#include "slash/include/slash_hash.h"
 
 using namespace slash;
 int main() {
