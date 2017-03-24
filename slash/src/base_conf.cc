@@ -4,14 +4,13 @@
 // of patent rights can be found in the PATENTS file in the same directory.
 
 #include "slash/include/base_conf.h"
-#include "slash/include/slash_string.h"
 
 #include <sys/stat.h>
-
 #include <algorithm>
 
 #include "slash/include/env.h"
 #include "slash/include/xdebug.h"
+#include "slash/include/slash_string.h"
 
 namespace slash {
 

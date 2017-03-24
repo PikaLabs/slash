@@ -3,13 +3,14 @@
 // LICENSE file in the root directory of this source tree. An additional grant
 // of patent rights can be found in the PATENTS file in the same directory.
 
-#include "include/base_conf.h"
-#include "include/env.h"
-#include "testharness.h"
-#include "testutil.h"
-
 #include <string>
 #include <vector>
+
+#include "slash/include/env.h"
+#include "slash/include/base_conf.h"
+#include "slash/include/testutil.h"
+#include "slash/test/testharness.h"
+
 
 namespace slash {
 

@@ -1,9 +1,5 @@
 #include "slash/include/env.h"
 
-#include <vector>
-#include <fstream>
-#include <sstream>
-
 #include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -11,8 +7,11 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
-#include "slash/include/xdebug.h"
+#include <vector>
+#include <fstream>
+#include <sstream>
 
+#include "slash/include/xdebug.h"
 
 namespace slash {
 

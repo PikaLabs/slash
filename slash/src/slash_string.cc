@@ -31,8 +31,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "slash/include/slash_string.h"
 
-#include "slash/include/fmacros.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +43,6 @@
 #include <sys/time.h>
 #include <float.h>
 #include <stdint.h>
-
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -53,9 +52,10 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <dirent.h>
+
 #include <algorithm>
 
-#include "slash/include/slash_string.h"
+#include "slash/include/fmacros.h"
 
 namespace slash {
 

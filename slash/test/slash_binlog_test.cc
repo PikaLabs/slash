@@ -2,14 +2,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree. An additional grant
 // of patent rights can be found in the PATENTS file in the same directory.
-
-#include "slash_binlog.h"
-#include "slash_binlog_impl.h"
-#include "env.h"
-#include "testharness.h"
-#include "testutil.h"
-
 #include <iostream>
+
+#include "slash/include/env.h"
+#include "slash/include/testutil.h"
+#include "slash/include/slash_binlog.h"
+#include "slash/src/slash_binlog_impl.h"
+#include "slash/test/testharness.h"
 
 namespace slash {
 

@@ -5,12 +5,11 @@
 
 #ifndef INCLUDE_BASE_CONF_H_
 #define INCLUDE_BASE_CONF_H_
+#include "stdlib.h"
+#include "stdio.h"
 
 #include <string>
 #include <vector>
-
-#include "stdlib.h"
-#include "stdio.h"
 
 #include "slash/include/slash_define.h"
 

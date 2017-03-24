@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
-#include "include/slash_status.h"
+#include "slash/include/slash_status.h"
 
 namespace slash {
 namespace test {
