@@ -58,10 +58,10 @@ check: $(LIBRARY) $(TESTS)
 
 TESTHARNESS = $(TESTS_DIR)/testharness.cc
 $(TESTS_DIR)/slash_string_test.test: $(TESTS_DIR)/slash_string_test.cc $(TESTHARNESS)
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBS) $(LIBRARY)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
 
 $(TESTS_DIR)/slash_binlog_test.test: $(TESTS_DIR)/slash_binlog_test.cc $(TESTHARNESS)
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBS) $(LIBRARY)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
 
 $(TESTS_DIR)/base_conf_test.test: $(TESTS_DIR)/base_conf_test.cc $(TESTHARNESS)
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBS) $(LIBRARY)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
