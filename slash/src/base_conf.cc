@@ -20,6 +20,7 @@ struct BaseConf::Rep {
   std::string path;
   enum ConfType {
     kConf = 0,
+
     kComment = 1,
   };
 

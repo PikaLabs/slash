@@ -5,7 +5,7 @@ else
 	#CXXFLAGS = -O2 -pipe -fPIC -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
 	CXXFLAGS = -O0 -g -pg -pipe -fPIC -D__XDEBUG__ -W -Wwrite-strings -Wpointer-arith -Wreorder -Wswitch -Wsign-promo -Wredundant-decls -Wformat -Wall -D_GNU_SOURCE -D__STDC_FORMAT_MACROS -std=c++11 -gdwarf-2 -Wno-unused-variable
 endif
-OBJECT = conf_example cond_lock_example binlog_example mutex_example hash_example
+BINARYS = conf_example cond_lock_example binlog_example mutex_example hash_example
 SRC_DIR = ./
 OUTPUT = ./output
 
@@ -25,13 +25,13 @@ BASE_BOJS += $(wildcard $(SRC_DIR)/*.c)
 BASE_BOJS += $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(patsubst %.cc,%.o,$(BASE_BOJS))
 
-all: $(OBJECT)
+all: $(BINARYS)
 	rm -rf $(OUTPUT)
 	mkdir -p $(OUTPUT)
 	mkdir -p $(OUTPUT)/bin
 	mkdir -p $(OUTPUT)/log
-	cp $(OBJECT) $(OUTPUT)/bin/
-	rm -rf $(OBJECT)
+	cp $(BINARYS) $(OUTPUT)/bin/
+	rm -rf $(BINARYS)
 	@echo "Success, go, go, go..."
 
 
@@ -57,5 +57,5 @@ clean:
 	rm -rf $(OUTPUT)
 	rm -rf $(SRC_DIR)/log
 	rm -f $(SRC_DIR)/*.o
-	rm -rf $(OBJECT)
+	rm -rf $(BINARYS)
 

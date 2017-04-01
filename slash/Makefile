@@ -8,7 +8,7 @@ endif
 
 SRC_DIR = ./src/
 LIB_DIR = ./lib
-TEST_DIR = ./test/
+TESTS_DIR = ./tests
 
 INCLUDE_PATH = -I../
 LIB_PATH = -L./ \
@@ -16,13 +16,12 @@ LIB_PATH = -L./ \
 
 LIBS = -lpthread
 
-LIBRARY = libslash.a
-OUTPUT_LIB = $(LIB_DIR)/$(LIBRARY)
+LIBRARY = $(LIB_DIR)/libslash.a
 
 TESTS = \
-  $(TEST_DIR)/slash_string_test \
-  $(TEST_DIR)/slash_binlog_test \
-  $(TEST_DIR)/base_conf_test
+  $(TESTS_DIR)/slash_string_test.test \
+  $(TESTS_DIR)/slash_binlog_test.test \
+  $(TESTS_DIR)/base_conf_test.test
 
 .PHONY: all clean check
 
@@ -33,16 +32,13 @@ BASE_OBJS += $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(patsubst %.cc,%.o,$(BASE_OBJS))
 
 
-all: $(OUTPUT_LIB)
+all: $(LIBRARY)
 	make -C example 
 	@echo "Success, go, go, go..."
 
-$(OUTPUT_LIB): $(LIBRARY)
-	mkdir -p $(LIB_DIR)
-	mv $< $(LIB_DIR)
-
 $(LIBRARY): $(OBJS)
 	rm -rf $@
+	mkdir -p $(LIB_DIR)
 	ar -rcs $@ $(OBJS)
 
 $(OBJECT): $(OBJS)
@@ -55,18 +51,17 @@ clean:
 	make -C example clean
 	rm -rf $(SRC_DIR)/*.o
 	rm -rf $(LIB_DIR)
-	rm -rf $(TESTS_DIR)
+	rm -rf $(TESTS)
 
-check: $(OUTPUT_LIB) $(TESTS)
+check: $(LIBRARY) $(TESTS)
 	for t in $(notdir $(TESTS)); do echo "***** Running $$t"; $(TESTS_DIR)/$$t || exit 1; done
 
 TESTHARNESS = $(TESTS_DIR)/testharness.cc
+$(TESTS_DIR)/slash_string_test.test: $(TESTS_DIR)/slash_string_test.cc $(TESTHARNESS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBS) $(LIBRARY)
 
-$(TESTS_DIR)/slash_string_test: $(TESTS_DIR)/slash_string_test.cc $(TESTHARNESS) $(OUTPUT_LIB) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) $^ -o $@
+$(TESTS_DIR)/slash_binlog_test.test: $(TESTS_DIR)/slash_binlog_test.cc $(TESTHARNESS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBS) $(LIBRARY)
 
-$(TESTS_DIR)/slash_binlog_test: $(TESTS_DIR)/slash_binlog_test.cc $(TESTHARNESS) $(OUTPUT_LIB) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) $^ -o $@
-
-$(TESTS_DIR)/base_conf_test: $(TESTS_DIR)/base_conf_test.cc $(TESTHARNESS) $(OUTPUT_LIB) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) $^ -o $@
+$(TESTS_DIR)/base_conf_test.test: $(TESTS_DIR)/base_conf_test.cc $(TESTHARNESS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBS) $(LIBRARY)

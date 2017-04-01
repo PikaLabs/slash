@@ -8,7 +8,7 @@
 #include "slash/include/testutil.h"
 #include "slash/include/slash_binlog.h"
 #include "slash/src/slash_binlog_impl.h"
-#include "slash/test/testharness.h"
+#include "slash/tests/testharness.h"
 
 namespace slash {
 

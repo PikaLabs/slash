@@ -29,4 +29,4 @@
 
 tags
 output
-tests
+*.test

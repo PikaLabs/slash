@@ -7,8 +7,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "slash_string.h"
-#include "testharness.h"
+#include "slash/include/slash_string.h"
+#include "slash/tests/testharness.h"
 
 #include <limits.h>
 

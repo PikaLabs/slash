@@ -9,7 +9,7 @@
 #include "slash/include/env.h"
 #include "slash/include/base_conf.h"
 #include "slash/include/testutil.h"
-#include "slash/test/testharness.h"
+#include "slash/tests/testharness.h"
 
 
 namespace slash {
