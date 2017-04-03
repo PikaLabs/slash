@@ -36,8 +36,9 @@ public:
    * timeout is millisecond
    * so if you want to wait for 1 s, you should call
    * TimeWait(1000);
+   * return false if timeout
    */
-  void TimedWait(uint32_t timeout);
+  bool TimedWait(uint32_t timeout);
   void Signal();
   void SignalAll();
   

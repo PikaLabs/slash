@@ -14,6 +14,18 @@ static void PthreadCall(const char* label, int result) {
   }
 }
 
+// Return false if timeout
+static bool PthreadTimeoutCall(const char* label, int result) {
+  if (result != 0) {
+    if (errno == ETIMEDOUT) {
+      return false;
+    }
+    fprintf(stderr, "pthread %s: %s\n", label, strerror(result));
+    abort();
+  }
+  return true;
+}
+
 Mutex::Mutex() { 
   PthreadCall("init mutex", pthread_mutex_init(&mu_, NULL)); 
 }
@@ -43,7 +55,8 @@ void CondVar::Wait() {
   PthreadCall("wait", pthread_cond_wait(&cv_, &mu_->mu_));
 }
 
-void CondVar::TimedWait(uint32_t timeout) {
+// return false if timeout
+bool CondVar::TimedWait(uint32_t timeout) {
   /*
    * pthread_cond_timedwait api use absolute API
    * so we need gettimeofday + timeout
@@ -56,7 +69,8 @@ void CondVar::TimedWait(uint32_t timeout) {
   tsp.tv_sec = now.tv_sec + usec / 1000000;
   tsp.tv_nsec = (usec % 1000000) * 1000;
 
-  pthread_cond_timedwait(&cv_, &mu_->mu_, &tsp);
+  return PthreadTimeoutCall("timewait",
+      pthread_cond_timedwait(&cv_, &mu_->mu_, &tsp));
 }
 
 void CondVar::Signal() {
