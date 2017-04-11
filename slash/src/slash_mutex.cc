@@ -17,7 +17,7 @@ static void PthreadCall(const char* label, int result) {
 // Return false if timeout
 static bool PthreadTimeoutCall(const char* label, int result) {
   if (result != 0) {
-    if (errno == ETIMEDOUT) {
+    if (result == ETIMEDOUT) {
       return false;
     }
     fprintf(stderr, "pthread %s: %s\n", label, strerror(result));
