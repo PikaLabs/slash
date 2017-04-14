@@ -111,6 +111,18 @@ const char* GetVarint32PtrFallback(const char* p,
   return NULL;
 }
 
+bool GetVarint32(std::string* input, uint32_t* value) {
+  const char* p = input->data();
+  const char* limit = p + input->size();
+  const char* q = GetVarint32Ptr(p, limit, value);
+  if (q == NULL) {
+    return false;
+  } else {
+    (*input).erase(0, q - p);
+    return true;
+  }
+}
+
 bool GetVarint32(Slice* input, uint32_t* value) {
   const char* p = input->data();
   const char* limit = p + input->size();
@@ -168,6 +180,18 @@ bool GetLengthPrefixedSlice(Slice* input, Slice* result) {
       input->size() >= len) {
     *result = Slice(input->data(), len);
     input->remove_prefix(len);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool GetLengthPrefixedString(std::string* input, std::string* result) {
+  uint32_t len;
+  if (GetVarint32(input, &len) &&
+      input->size() >= len) {
+    *result = (*input).substr(0, len);
+    input->erase(0, len);
     return true;
   } else {
     return false;

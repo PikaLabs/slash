@@ -32,6 +32,7 @@ extern bool GetVarint64(std::string* input, uint64_t* value);
 extern const char* GetLengthPrefixedSlice(const char* p, const char* limit,
                                           Slice* result);
 extern bool GetLengthPrefixedSlice(Slice* input, Slice* result);
+extern bool GetLengthPrefixedString(std::string* input, std::string* result);
 
 // Pointer-based variants of GetVarint...  These either store a value
 // in *v and return a pointer just past the parsed value, or return
