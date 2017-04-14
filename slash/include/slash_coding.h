@@ -14,6 +14,8 @@
 #include <string.h>
 #include <string>
 
+#include "slash/include/slash_slice.h"
+
 namespace slash {
 
 // Standard Put... routines append to a string
@@ -27,7 +29,9 @@ extern void GetFixed32(std::string* dst, uint32_t* value);
 extern void GetFixed64(std::string* dst, uint64_t* value);
 extern bool GetVarint32(std::string* input, uint32_t* value);
 extern bool GetVarint64(std::string* input, uint64_t* value);
-extern bool GetLengthPrefixedString(std::string* input, std::string* result);
+extern const char* GetLengthPrefixedSlice(const char* p, const char* limit,
+                                          Slice* result);
+extern bool GetLengthPrefixedSlice(Slice* input, Slice* result);
 
 // Pointer-based variants of GetVarint...  These either store a value
 // in *v and return a pointer just past the parsed value, or return
