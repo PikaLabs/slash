@@ -30,7 +30,9 @@
 #ifndef _SLASH_FMACRO_H
 #define _SLASH_FMACRO_H
 
+#ifndef _BSD_SOURCE
 #define _BSD_SOURCE
+#endif
 
 #if defined(__linux__)
 #define _GNU_SOURCE_REDIS
@@ -55,7 +57,10 @@
 #define _POSIX_C_SOURCE 199506L
 #endif
 
+#ifndef _LARGEFILE_SOURCE
 #define _LARGEFILE_SOURCE
+#endif
+
 #define _FILE_OFFSET_BITS 64
 
 #endif
