@@ -3,6 +3,7 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "slash/include/slash_coding.h"
+#include "slash/include/slash_slice.h"
 
 namespace slash {
 
@@ -11,7 +12,7 @@ void EncodeFixed32(char* buf, uint32_t value) {
 }
 
 void EncodeFixed64(char* buf, uint64_t value) {
-    memcpy(buf, &value, sizeof(value));
+  memcpy(buf, &value, sizeof(value));
 }
 
 void PutFixed32(std::string* dst, uint32_t value) {
@@ -122,6 +123,18 @@ bool GetVarint32(std::string* input, uint32_t* value) {
   }
 }
 
+bool GetVarint32(Slice* input, uint32_t* value) {
+  const char* p = input->data();
+  const char* limit = p + input->size();
+  const char* q = GetVarint32Ptr(p, limit, value);
+  if (q == NULL) {
+    return false;
+  } else {
+    *input = Slice(q, limit - q);
+    return true;
+  }
+}
+
 const char* GetVarint64Ptr(const char* p, const char* limit, uint64_t* value) {
   uint64_t result = 0;
   for (uint32_t shift = 0; shift <= 63 && p < limit; shift += 7) {
@@ -139,15 +152,37 @@ const char* GetVarint64Ptr(const char* p, const char* limit, uint64_t* value) {
   return NULL;
 }
 
-bool GetVarint64(std::string* input, uint64_t* value) {
+bool GetVarint64(Slice* input, uint64_t* value) {
   const char* p = input->data();
   const char* limit = p + input->size();
   const char* q = GetVarint64Ptr(p, limit, value);
   if (q == NULL) {
     return false;
   } else {
-    (*input).erase(0, q - p);
+    *input = Slice(q, limit - q);
     return true;
+  }
+}
+
+const char* GetLengthPrefixedSlice(const char* p, const char* limit,
+                                   Slice* result) {
+  uint32_t len;
+  p = GetVarint32Ptr(p, limit, &len);
+  if (p == NULL) return NULL;
+  if (p + len > limit) return NULL;
+  *result = Slice(p, len);
+  return p + len;
+}
+
+bool GetLengthPrefixedSlice(Slice* input, Slice* result) {
+  uint32_t len;
+  if (GetVarint32(input, &len) &&
+      input->size() >= len) {
+    *result = Slice(input->data(), len);
+    input->remove_prefix(len);
+    return true;
+  } else {
+    return false;
   }
 }
 

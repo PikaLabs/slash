@@ -21,6 +21,7 @@ LIBRARY = $(LIB_DIR)/libslash.a
 TESTS = \
   $(TESTS_DIR)/slash_string_test.test \
   $(TESTS_DIR)/slash_binlog_test.test \
+  $(TESTS_DIR)/slash_coding_test.test \
   $(TESTS_DIR)/base_conf_test.test
 
 .PHONY: all clean check
@@ -57,6 +58,7 @@ check: $(LIBRARY) $(TESTS)
 	for t in $(notdir $(TESTS)); do echo "***** Running $$t"; $(TESTS_DIR)/$$t || exit 1; done
 
 TESTHARNESS = $(TESTS_DIR)/testharness.cc
+
 $(TESTS_DIR)/slash_string_test.test: $(TESTS_DIR)/slash_string_test.cc $(TESTHARNESS)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
 
@@ -64,4 +66,7 @@ $(TESTS_DIR)/slash_binlog_test.test: $(TESTS_DIR)/slash_binlog_test.cc $(TESTHAR
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
 
 $(TESTS_DIR)/base_conf_test.test: $(TESTS_DIR)/base_conf_test.cc $(TESTHARNESS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
+
+$(TESTS_DIR)/slash_coding_test.test: $(TESTS_DIR)/slash_coding_test.cc $(TESTHARNESS)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
