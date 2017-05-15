@@ -126,6 +126,19 @@ bool BaseConf::GetConfInt(const std::string &name, int* value) const {
   return false;
 }
 
+bool BaseConf::GetConfInt64(const std::string &name, long long int* value) const {
+  for (int i = 0; i < rep_->item.size(); i++) {
+    if (rep_->item[i].type == Rep::kComment) {
+      continue;
+    }
+    if (name == rep_->item[i].name) {
+      (*value) = atoi(rep_->item[i].value.c_str());
+      return true;
+    }
+  }
+  return false;
+}
+
 bool BaseConf::GetConfStr(const std::string &name, std::string *val) const {
   for (int i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == 1) {
@@ -180,6 +193,19 @@ bool BaseConf::GetConfBool(const std::string &name, bool* value) const {
 }
 
 bool BaseConf::SetConfInt(const std::string &name, const int value) {
+  for (int i = 0; i < rep_->item.size(); i++) {
+    if (rep_->item[i].type == Rep::kComment) {
+      continue;
+    }
+    if (name == rep_->item[i].name) {
+      rep_->item[i].value = std::to_string(value);
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BaseConf::SetConfInt64(const std::string &name, const long long int value) {
   for (int i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
