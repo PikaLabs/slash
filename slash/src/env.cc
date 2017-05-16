@@ -32,7 +32,6 @@ int SetMaxFileDescriptorNum(int64_t max_file_descriptor_num) {
     if (limit.rlim_cur < (rlim_t)max_file_descriptor_num) {
       // rlim_cur could be set by any user while rlim_max are
       // changeable only by root.
-      rlim_t previous_limit = limit.rlim_cur;
       limit.rlim_cur = max_file_descriptor_num;
       if(limit.rlim_cur > limit.rlim_max) {
         limit.rlim_max = max_file_descriptor_num;
