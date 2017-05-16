@@ -19,7 +19,13 @@ namespace slash {
 /*
  *  Set the resource limits of a process
  */
-bool SetMaxFileDescriptorNum(int64_t max_file_descriptor_num) {
+
+/*
+ *  0: success.
+ * -1: set failed.
+ * -2: get resource limits failed.
+ */
+int SetMaxFileDescriptorNum(int64_t max_file_descriptor_num) {
   // Try to Set the number of file descriptor
   struct  rlimit limit;
   if (getrlimit(RLIMIT_NOFILE, &limit) != -1) {
@@ -32,19 +38,15 @@ bool SetMaxFileDescriptorNum(int64_t max_file_descriptor_num) {
         limit.rlim_max = max_file_descriptor_num;
       }
       if (setrlimit(RLIMIT_NOFILE, &limit) != -1) {
-        log_warn("your 'limit -n ' of %d is not enough for zeppelin to start, zeppelin have successfully reconfig it to %lld", previous_limit, limit.rlim_cur);
-        return true;
+        return 0;
       } else {
-        log_warn("your 'limit -n ' of %d is not enough for zeppelin to start, but zeppelin can not reconfig it: %s, do it by yourself", previous_limit, strerror(errno));
-        return false;
+        return -1;
       };
     } else {
-      log_warn("your 'limit -n ' of %d is enough for zeppelin to start", previous_limit);
-      return true;
+      return 0;
     }
   } else {
-    log_warn("getrlimir error: %s", strerror(errno));
-    return false;
+    return -2;
   }
 }
 

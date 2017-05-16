@@ -132,8 +132,7 @@ bool BaseConf::GetConfInt64(const std::string &name, int64_t* value) const {
       continue;
     }
     if (name == rep_->item[i].name) {
-      char *end;
-      (*value) = strtoll(rep_->item[i].value.c_str(), &end, 10);
+      (*value) = strtoll(rep_->item[i].value.c_str(), NULL, 10);
       return true;
     }
   }
