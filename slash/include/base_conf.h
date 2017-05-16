@@ -24,14 +24,14 @@ public:
   int LoadConf();
 
   bool GetConfInt(const std::string &name, int* value) const;
-  bool GetConfInt64(const std::string &name, long long int* value) const;
+  bool GetConfInt64(const std::string &name, int64_t* value) const;
 
   bool GetConfStr(const std::string &name, std::string *value) const;
   bool GetConfBool(const std::string &name, bool* value) const;
   bool GetConfStrVec(const std::string &name, std::vector<std::string> *value) const;
 
   bool SetConfInt(const std::string &name, const int value);
-  bool SetConfInt64(const std::string &name, const long long int value);
+  bool SetConfInt64(const std::string &name, const int64_t value);
 
   bool SetConfStr(const std::string &name, const std::string &value);
   bool SetConfBool(const std::string &name, const bool value);

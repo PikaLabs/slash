@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 
 #include <vector>
 #include <fstream>
@@ -14,6 +15,41 @@
 #include "slash/include/xdebug.h"
 
 namespace slash {
+
+/*
+ *  Set the resource limits of a process
+ */
+
+/*
+ *  0: success.
+ * -1: set failed.
+ * -2: get resource limits failed.
+ */
+int SetMaxFileDescriptorNum(int64_t max_file_descriptor_num) {
+  // Try to Set the number of file descriptor
+  struct  rlimit limit;
+  if (getrlimit(RLIMIT_NOFILE, &limit) != -1) {
+    if (limit.rlim_cur < (rlim_t)max_file_descriptor_num) {
+      // rlim_cur could be set by any user while rlim_max are
+      // changeable only by root.
+      rlim_t previous_limit = limit.rlim_cur;
+      limit.rlim_cur = max_file_descriptor_num;
+      if(limit.rlim_cur > limit.rlim_max) {
+        limit.rlim_max = max_file_descriptor_num;
+      }
+      if (setrlimit(RLIMIT_NOFILE, &limit) != -1) {
+        return 0;
+      } else {
+        return -1;
+      };
+    } else {
+      return 0;
+    }
+  } else {
+    return -2;
+  }
+}
+
 
 /*
  * size of initial mmap size
