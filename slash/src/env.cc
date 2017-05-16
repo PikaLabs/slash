@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 
 #include <vector>
 #include <fstream>
@@ -14,6 +15,39 @@
 #include "slash/include/xdebug.h"
 
 namespace slash {
+
+/*
+ *  Set the resource limits of a process
+ */
+bool SetMaxFileDescriptorNum(int64_t max_file_descriptor_num) {
+  // Try to Set the number of file descriptor
+  struct  rlimit limit;
+  if (getrlimit(RLIMIT_NOFILE, &limit) != -1) {
+    if (limit.rlim_cur < (rlim_t)max_file_descriptor_num) {
+      // rlim_cur could be set by any user while rlim_max are
+      // changeable only by root.
+      rlim_t previous_limit = limit.rlim_cur;
+      limit.rlim_cur = max_file_descriptor_num;
+      if(limit.rlim_cur > limit.rlim_max) {
+        limit.rlim_max = max_file_descriptor_num;
+      }
+      if (setrlimit(RLIMIT_NOFILE, &limit) != -1) {
+        log_warn("your 'limit -n ' of %d is not enough for zeppelin to start, zeppelin have successfully reconfig it to %lld", previous_limit, limit.rlim_cur);
+        return true;
+      } else {
+        log_warn("your 'limit -n ' of %d is not enough for zeppelin to start, but zeppelin can not reconfig it: %s, do it by yourself", previous_limit, strerror(errno));
+        return false;
+      };
+    } else {
+      log_warn("your 'limit -n ' of %d is enough for zeppelin to start", previous_limit);
+      return true;
+    }
+  } else {
+    log_warn("getrlimir error: %s", strerror(errno));
+    return false;
+  }
+}
+
 
 /*
  * size of initial mmap size

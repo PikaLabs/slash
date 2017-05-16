@@ -15,6 +15,11 @@ class RWFile;
 class RandomRWFile;
 
 /*
+ *  Set the resource limits of a process
+ */
+bool SetMaxFileDescriptorNum(int64_t max_file_descriptor_num);
+
+/*
  * Set size of initial mmap size
  */
 void SetMmapBoundSize(size_t size);

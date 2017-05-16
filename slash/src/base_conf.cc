@@ -126,13 +126,14 @@ bool BaseConf::GetConfInt(const std::string &name, int* value) const {
   return false;
 }
 
-bool BaseConf::GetConfInt64(const std::string &name, long long int* value) const {
+bool BaseConf::GetConfInt64(const std::string &name, int64_t* value) const {
   for (int i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
     if (name == rep_->item[i].name) {
-      (*value) = atoi(rep_->item[i].value.c_str());
+      char *end;
+      (*value) = strtoll(rep_->item[i].value.c_str(), &end, 10);
       return true;
     }
   }
@@ -205,7 +206,7 @@ bool BaseConf::SetConfInt(const std::string &name, const int value) {
   return false;
 }
 
-bool BaseConf::SetConfInt64(const std::string &name, const long long int value) {
+bool BaseConf::SetConfInt64(const std::string &name, const int64_t value) {
   for (int i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
