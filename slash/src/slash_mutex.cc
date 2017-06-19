@@ -42,6 +42,30 @@ void Mutex::Unlock() {
   PthreadCall("unlock", pthread_mutex_unlock(&mu_)); 
 }
 
+RWMutex::RWMutex() {
+  PthreadCall("init rw mutex", pthread_rwlock_init(&rw_mu_, NULL));
+}
+
+RWMutex::~RWMutex() {
+  PthreadCall("destroy rw mutex", pthread_rwlock_destroy(&rw_mu_));
+}
+
+void RWMutex::ReadLock() {
+  PthreadCall("rw readlock", pthread_rwlock_rdlock(&rw_mu_));
+}
+
+void RWMutex::WriteLock() {
+  PthreadCall("rw writelock", pthread_rwlock_wrlock(&rw_mu_));
+}
+
+void RWMutex::WriteUnlock() {
+  PthreadCall("rw write unlock", pthread_rwlock_unlock(&rw_mu_));
+}
+
+void RWMutex::ReadUnlock() {
+  PthreadCall("rw read unlock", pthread_rwlock_unlock(&rw_mu_));
+}
+
 CondVar::CondVar(Mutex* mu)
   : mu_(mu) {
     PthreadCall("init cv", pthread_cond_init(&cv_, NULL));

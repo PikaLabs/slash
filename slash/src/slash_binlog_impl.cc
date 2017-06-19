@@ -26,12 +26,10 @@ Version::Version(RWFile *save)
     item_num_(0),
     save_(save) {
   assert(save_ != NULL);
-  pthread_rwlock_init(&rwlock_, NULL);
 }
 
 Version::~Version() {
   StableSave();
-  pthread_rwlock_destroy(&rwlock_);
 }
 
 Status Version::StableSave() {
@@ -139,7 +137,7 @@ void BinlogImpl::InitOffset() {
 }
 
 Status BinlogImpl::GetProducerStatus(uint32_t* filenum, uint64_t* offset) {
-  RWLock(&(version_->rwlock_), false);
+  ReadLock(&version_->rwlock_);
   *filenum = version_->pro_num_;
   *offset = version_->pro_offset_;
   return Status::OK();
@@ -160,7 +158,7 @@ Status BinlogImpl::Append(const std::string &item) {
     NewWritableFile(profile, &queue_);
 
     {
-      RWLock(&(version_->rwlock_), true);
+      WriteLock(&version_->rwlock_);
       version_->pro_offset_ = 0;
       version_->pro_num_ = pro_num_;
       version_->StableSave();
@@ -171,7 +169,7 @@ Status BinlogImpl::Append(const std::string &item) {
   int pro_offset;
   s = Produce(Slice(item.data(), item.size()), &pro_offset);
   if (s.ok()) {
-    RWLock(&(version_->rwlock_), true);
+    WriteLock(&version_->rwlock_);
     version_->pro_offset_ = pro_offset;
     version_->StableSave();
   }
@@ -325,11 +323,9 @@ Status BinlogImpl::SetProducerStatus(uint32_t pro_num, uint64_t pro_offset) {
   pro_num_ = pro_num;
 
   {
-    RWLock(&(version_->rwlock_), true);
+    WriteLock(&version_->rwlock_);
     version_->pro_num_ = pro_num;
     version_->pro_offset_ = pro_offset;
-    //version_->set_pro_num(pro_num);
-    //version_->set_pro_offset(pro_offset);
     version_->StableSave();
   }
 

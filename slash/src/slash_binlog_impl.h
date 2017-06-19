@@ -119,10 +119,10 @@ class Version {
   uint32_t pro_num_;
   uint32_t item_num_;
 
-  pthread_rwlock_t rwlock_;
+  RWMutex rwlock_;
 
   void debug() {
-    RWLock(&rwlock_, false);
+    ReadLock(&this->rwlock_);
     printf ("Current pro_num %u pro_offset %lu\n", pro_num_, pro_offset_);
   }
 

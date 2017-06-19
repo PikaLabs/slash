@@ -10,7 +10,7 @@ namespace slash {
 class CondVar;
 
 class Mutex {
-public:
+ public:
   Mutex();
   ~Mutex();
 
@@ -18,7 +18,7 @@ public:
   void Unlock();
   void AssertHeld() { }
 
-private:
+ private:
   friend class CondVar;
   pthread_mutex_t mu_;
 
@@ -27,8 +27,56 @@ private:
   void operator=(const Mutex&);
 };
 
+class RWMutex {
+ public:
+  RWMutex();
+  ~RWMutex();
+
+  void ReadLock();
+  void WriteLock();
+  void ReadUnlock();
+  void WriteUnlock();
+
+ private:
+  pthread_rwlock_t rw_mu_;
+
+  // No copying
+  RWMutex(const RWMutex&);
+  void operator=(const RWMutex&);
+};
+
+class ReadLock {
+ public:
+  explicit ReadLock(RWMutex* rw_mu)
+      : rw_mu_(rw_mu) {
+    this->rw_mu_->ReadLock();
+  }
+  ~ReadLock() { this->rw_mu_->ReadUnlock(); }
+
+ private:
+  RWMutex *const rw_mu_;
+  // No copying
+  ReadLock(const ReadLock&);
+  void operator=(const ReadLock&);
+};
+
+class WriteLock {
+ public:
+  WriteLock(RWMutex* rw_mu)
+      : rw_mu_(rw_mu) {
+    this->rw_mu_->WriteLock();
+  }
+  ~WriteLock() { this->rw_mu_->WriteUnlock(); }
+
+ private:
+  RWMutex *const rw_mu_;
+  // No copying allowed
+  WriteLock(const WriteLock&);
+  void operator=(const WriteLock&);
+};
+
 class CondVar {
-public:
+ public:
   explicit CondVar(Mutex* mu);
   ~CondVar();
   void Wait();
@@ -42,20 +90,20 @@ public:
   void Signal();
   void SignalAll();
   
-private:
+ private:
   pthread_cond_t cv_;
   Mutex* mu_;
 };
 
 class MutexLock {
-public:
+ public:
   explicit MutexLock(Mutex *mu)
     : mu_(mu)  {
       this->mu_->Lock();
     }
   ~MutexLock() { this->mu_->Unlock(); }
 
-private:
+ private:
   Mutex *const mu_;
   // No copying allowed
   MutexLock(const MutexLock&);
@@ -64,25 +112,6 @@ private:
 
 typedef pthread_once_t OnceType;
 extern void InitOnce(OnceType* once, void (*initializer)());
-
-class RWLock {
-  public:
-    RWLock(pthread_rwlock_t *mu, bool is_rwlock) :
-		mu_(mu) {
-      if (is_rwlock) {
-        pthread_rwlock_wrlock(this->mu_);
-      } else {
-        pthread_rwlock_rdlock(this->mu_);
-      }
-    }
-    ~RWLock() { pthread_rwlock_unlock(this->mu_); }
-
-  private:
-    pthread_rwlock_t *const mu_;
-    // No copying allowed
-    RWLock(const RWLock&);
-    void operator=(const RWLock&);
-};
 
 class RefMutex {
  public:
