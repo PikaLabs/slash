@@ -4,6 +4,7 @@
 #define SPACE ' '
 #define COLON ':'
 #define COMMENT '#'
+#define COMMA ','
 
 
 #endif

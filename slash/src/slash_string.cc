@@ -508,7 +508,7 @@ void getRandomHexChars(char *p, unsigned int len) {
 }
 
 std::vector<std::string>& StringSplit(const std::string &s,
-        char delim, std::vector<std::string> &elems) { 
+        char delim, std::vector<std::string> &elems) {
     elems.clear();
     std::stringstream ss(s);
     std::string item;

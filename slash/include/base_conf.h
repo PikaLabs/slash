@@ -35,6 +35,7 @@ public:
 
   bool SetConfStr(const std::string &name, const std::string &value);
   bool SetConfBool(const std::string &name, const bool value);
+  bool SetConfStrVec(const std::string &name, const std::vector<std::string> &value);
 
   void DumpConf() const;
   bool WriteBack();

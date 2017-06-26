@@ -248,6 +248,11 @@ bool BaseConf::SetConfBool(const std::string &name, const bool value) {
   return false;
 }
 
+bool BaseConf::SetConfStrVec(const std::string& name, const std::vector<std::string> &value) {
+  std::string value_str = StringConcat(value, COMMA);
+  return SetConfStr(name, value_str); 
+}
+
 void BaseConf::DumpConf() const {
   int cnt = 1;
   for (int i = 0; i < rep_->item.size(); i++) {
