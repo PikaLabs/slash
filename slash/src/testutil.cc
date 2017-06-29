@@ -12,7 +12,7 @@ std::string RandomString(const int len) {
   for (int i = 0; i < len; i++) {
     buf[i] = Random::Uniform('z' - 'a') + 'a';
   }
-  return buf;
+  return std::string(buf, len);
 }
 
 int GetTestDirectory(std::string *result) {
