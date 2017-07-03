@@ -126,7 +126,7 @@ int BaseConf::ReloadConf() {
 }
 
 bool BaseConf::GetConfInt(const std::string &name, int* value) const {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -139,7 +139,7 @@ bool BaseConf::GetConfInt(const std::string &name, int* value) const {
 }
 
 bool BaseConf::GetConfInt64(const std::string &name, int64_t* value) const {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -152,7 +152,7 @@ bool BaseConf::GetConfInt64(const std::string &name, int64_t* value) const {
 }
 
 bool BaseConf::GetConfStr(const std::string &name, std::string *val) const {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == 1) {
       continue;
     }
@@ -165,7 +165,7 @@ bool BaseConf::GetConfStr(const std::string &name, std::string *val) const {
 }
 
 bool BaseConf::GetConfStrVec(const std::string &name, std::vector<std::string> *value) const {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -188,7 +188,7 @@ bool BaseConf::GetConfStrVec(const std::string &name, std::vector<std::string> *
 }
 
 bool BaseConf::GetConfBool(const std::string &name, bool* value) const {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -205,7 +205,7 @@ bool BaseConf::GetConfBool(const std::string &name, bool* value) const {
 }
 
 bool BaseConf::SetConfInt(const std::string &name, const int value) {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -218,7 +218,7 @@ bool BaseConf::SetConfInt(const std::string &name, const int value) {
 }
 
 bool BaseConf::SetConfInt64(const std::string &name, const int64_t value) {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -231,7 +231,7 @@ bool BaseConf::SetConfInt64(const std::string &name, const int64_t value) {
 }
 
 bool BaseConf::SetConfStr(const std::string &name, const std::string &value) {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -244,7 +244,7 @@ bool BaseConf::SetConfStr(const std::string &name, const std::string &value) {
 }
 
 bool BaseConf::SetConfBool(const std::string &name, const bool value) {
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {
       continue;
     }
@@ -267,7 +267,7 @@ bool BaseConf::SetConfStrVec(const std::string& name, const std::vector<std::str
 
 void BaseConf::DumpConf() const {
   int cnt = 1;
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kConf) {
       printf("%2d %s %s\n", cnt++, rep_->item[i].name.c_str(), rep_->item[i].value.c_str());
     }
@@ -280,7 +280,7 @@ bool BaseConf::WriteBack() {
   Status ret = NewWritableFile(tmp_path, &write_file);
   log_info("ret %s", ret.ToString().c_str());
   std::string tmp;
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kConf) {
       tmp = rep_->item[i].name + " : " + rep_->item[i].value + "\n";
       write_file->Append(tmp);
@@ -299,7 +299,7 @@ void BaseConf::WriteSampleConf() const {
   std::string sample_path = rep_->path + ".sample";
   Status ret = NewWritableFile(sample_path, &write_file);
   std::string tmp;
-  for (int i = 0; i < rep_->item.size(); i++) {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kConf) {
       tmp = rep_->item[i].name + " :\n";
       write_file->Append(tmp);

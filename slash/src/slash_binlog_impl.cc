@@ -450,7 +450,7 @@ uint64_t BinlogReaderImpl::GetNext(Status &result) {
 
 unsigned int BinlogReaderImpl::ReadPhysicalRecord(Slice *result) {
   Status s;
-  int zero_space = end_of_buffer_offset_ - last_record_offset_;
+  uint64_t zero_space = end_of_buffer_offset_ - last_record_offset_;
   if (zero_space <= kHeaderSize) {
     queue_->Skip(zero_space);
     offset_ += zero_space;

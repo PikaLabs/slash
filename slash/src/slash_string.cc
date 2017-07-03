@@ -617,7 +617,8 @@ std::string StringTrim(std::string ori, const std::string charlist) {
   if (ori.empty())
     return ori;
 
-  int pos = 0, rpos = ori.size() - 1;
+  size_t pos = 0;
+  int rpos = ori.size() - 1;
   while (pos < ori.size()) {
     bool meet = false;
     for (char c : charlist)
