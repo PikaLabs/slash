@@ -113,6 +113,18 @@ int BaseConf::LoadConf() {
   return 0;
 }
 
+int BaseConf::ReloadConf() {
+  Rep* rep = rep_;
+  rep_ = new Rep(rep->path);
+  if (LoadConf() == -1) {
+    delete rep_;
+    rep_ = rep;
+    return -1;
+  }
+  delete rep;
+  return 0;
+}
+
 bool BaseConf::GetConfInt(const std::string &name, int* value) const {
   for (int i = 0; i < rep_->item.size(); i++) {
     if (rep_->item[i].type == Rep::kComment) {

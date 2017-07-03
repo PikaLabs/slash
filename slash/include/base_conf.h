@@ -22,6 +22,7 @@ public:
   virtual ~BaseConf();
 
   int LoadConf();
+  int32_t ReloadConf();
 
   bool GetConfInt(const std::string &name, int* value) const;
   bool GetConfInt64(const std::string &name, int64_t* value) const;
