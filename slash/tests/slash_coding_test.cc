@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "slash/include/slash_coding.h"
-#include "slash/tests/testharness.h"
+#include "slash/include/slash_testharness.h"
 
 namespace slash {
 
@@ -195,8 +195,4 @@ TEST(Coding, Strings) {
   ASSERT_EQ("", input.ToString());
 }
 
-}  // namespace leveldb
-
-int main() {
-  return slash::test::RunAllTests();
-}
+}  // namespace slash

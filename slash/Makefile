@@ -6,12 +6,12 @@ else
 	# CXXFLAGS = -Wall -W -DDEBUG -g -O0 -D__XDEBUG__ -D__STDC_FORMAT_MACROS -fPIC -std=c++11 -gdwarf-2
 endif
 
-SRC_DIR = ./src/
+SRC_DIR = ./src
 LIB_DIR = ./lib
 TESTS_DIR = ./tests
 
-INCLUDE_PATH = -I../
-LIB_PATH = -L./ \
+INCLUDE_PATH = -I..
+LIB_PATH = -L. \
 
 
 LIBS = -lpthread
@@ -19,10 +19,11 @@ LIBS = -lpthread
 LIBRARY = $(LIB_DIR)/libslash.a
 
 TESTS = \
-  $(TESTS_DIR)/slash_string_test.test \
-  $(TESTS_DIR)/slash_binlog_test.test \
-  $(TESTS_DIR)/slash_coding_test.test \
-  $(TESTS_DIR)/base_conf_test.test
+  $(TESTS_DIR)/slash_string.test \
+  $(TESTS_DIR)/slash_binlog.test \
+  $(TESTS_DIR)/slash_coding.test \
+  $(TESTS_DIR)/base_conf.test \
+  $(TESTS_DIR)/slash_env.test \
 
 .PHONY: all clean check
 
@@ -57,16 +58,17 @@ clean:
 check: $(LIBRARY) $(TESTS)
 	for t in $(notdir $(TESTS)); do echo "***** Running $$t"; $(TESTS_DIR)/$$t || exit 1; done
 
-TESTHARNESS = $(TESTS_DIR)/testharness.cc
-
-$(TESTS_DIR)/slash_string_test.test: $(TESTS_DIR)/slash_string_test.cc $(TESTHARNESS)
+$(TESTS_DIR)/slash_string.test: $(TESTS_DIR)/slash_string_test.cc $(TESTS_DIR)/test_main.cc
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
 
-$(TESTS_DIR)/slash_binlog_test.test: $(TESTS_DIR)/slash_binlog_test.cc $(TESTHARNESS)
+$(TESTS_DIR)/slash_binlog.test: $(TESTS_DIR)/slash_binlog_test.cc $(TESTS_DIR)/test_main.cc
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
 
-$(TESTS_DIR)/base_conf_test.test: $(TESTS_DIR)/base_conf_test.cc $(TESTHARNESS)
+$(TESTS_DIR)/base_conf.test: $(TESTS_DIR)/base_conf_test.cc $(TESTS_DIR)/test_main.cc
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
 
-$(TESTS_DIR)/slash_coding_test.test: $(TESTS_DIR)/slash_coding_test.cc $(TESTHARNESS)
+$(TESTS_DIR)/slash_coding.test: $(TESTS_DIR)/slash_coding_test.cc $(TESTS_DIR)/test_main.cc
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)
+
+$(TESTS_DIR)/slash_env.test: $(TESTS_DIR)/slash_env_test.cc $(TESTS_DIR)/test_main.cc
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(INCLUDE_PATH) $(LIBRARY) $(LIBS)

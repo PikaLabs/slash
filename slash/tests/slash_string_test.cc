@@ -8,7 +8,7 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "slash/include/slash_string.h"
-#include "slash/tests/testharness.h"
+#include "slash/include/slash_testharness.h"
 
 #include <limits.h>
 
@@ -127,7 +127,3 @@ TEST(StringTest, test_string2l) {
 }
 
 }  // namespace slash
-
-int main() {
-  return slash::test::RunAllTests();
-}
