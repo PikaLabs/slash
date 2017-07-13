@@ -8,6 +8,7 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "slash/include/env.h"
+#include "slash/include/testutil.h"
 #include "slash/include/slash_testharness.h"
 
 namespace slash {
@@ -16,6 +17,16 @@ class EnvTest { };
 
 TEST(EnvTest, SetMaxFileDescriptorNum) {
   ASSERT_EQ(0, SetMaxFileDescriptorNum(10));
+  ASSERT_NE(0, SetMaxFileDescriptorNum(2147483647));
+}
+
+TEST(EnvTest, FileOps) {
+  std::string tmp_dir;
+  GetTestDirectory(&tmp_dir);
+
+  ASSERT_TRUE(DeleteDirIfExist(tmp_dir));
+  ASSERT_TRUE(!FileExists(tmp_dir));
+  ASSERT_EQ(-1, DeleteDir(tmp_dir));
   ASSERT_NE(0, SetMaxFileDescriptorNum(2147483647));
 }
 

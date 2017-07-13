@@ -72,7 +72,7 @@ int CreateDir(const std::string& path) {
   return res;
 }
 
-int FileExists(const std::string& path) {
+bool FileExists(const std::string& path) {
   return access(path.c_str(), F_OK) == 0;
 }
 
