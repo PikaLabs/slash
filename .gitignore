@@ -28,5 +28,21 @@
 *.app
 
 tags
-output
 *.test
+lib/
+slash/src/build_version.cc
+
+# examples
+binlog_example
+cond_lock_example
+conf_example
+hash_example
+make_config.mk
+mutex_example
+
+# tests
+base_conf_test
+slash_binlog_test
+slash_coding_test
+slash_env_test
+slash_string_test

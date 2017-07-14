@@ -9,6 +9,8 @@
 // of patent rights can be found in the PATENTS file in the same directory.
 #pragma once
 
-#define SLASH_MAJOR 1
-#define SLASH_MINOR 0
-#define SLASH_PATCH 0
+// this variable tells us about the git revision
+extern const char* slash_build_git_sha;
+
+// Date on which the code was compiled:
+extern const char* slash_build_compile_date;

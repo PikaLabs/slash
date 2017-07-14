@@ -5,11 +5,11 @@ LDFLAGS += $(EXTRA_LDFLAGS)
 ARFLAGS = rs
 OPT=
 
-# Set the default DEBUG_LEVEL to 1
+# Set the default DEBUG_LEVEL to 0
 DEBUG_LEVEL?=0
 
 ifeq ($(MAKECMDGOALS),dbg)
-  DEBUG_LEVEL=2
+  DEBUG_LEVEL=1
 endif
 
 ifeq ($(MAKECMDGOALS),all)
@@ -28,20 +28,16 @@ ifeq ($(MAKECMDGOALS),static_lib)
   DEBUG_LEVEL=0
 endif
 
-# compile with -O2 if debug level is not 2
-ifneq ($(DEBUG_LEVEL), 2)
-OPT += -O2 -fno-omit-frame-pointer
+# compile with -O2 if for release
+# if we're compiling for release, compile without debug code (-DNDEBUG) and
+# don't treat warnings as errors
+ifeq ($(DEBUG_LEVEL),0)
+DISABLE_WARNING_AS_ERROR=1
+OPT += -O2 -fno-omit-frame-pointer -DNDEBUG
 # Skip for archs that don't support -momit-leaf-frame-pointer
 ifeq (,$(shell $(CXX) -fsyntax-only -momit-leaf-frame-pointer -xc /dev/null 2>&1))
 OPT += -momit-leaf-frame-pointer
 endif
-endif
-
-# if we're compiling for release, compile without debug code (-DNDEBUG) and
-# don't treat warnings as errors
-ifeq ($(DEBUG_LEVEL),0)
-OPT += -DNDEBUG
-DISABLE_WARNING_AS_ERROR=1
 else
 $(warning Warning: Compiling in debug mode. Don't use the resulting binary in production)
 endif
@@ -144,9 +140,9 @@ LIBOUTPUT = ./lib
 dummy := $(shell mkdir -p $(LIBOUTPUT))
 LIBRARY = $(LIBOUTPUT)/${LIBNAME}.a
 
-SLASH_MAJOR = $(shell egrep "SLASH_MAJOR.[0-9]" include/version.h | cut -d ' ' -f 3)
-SLASH_MINOR = $(shell egrep "SLASH_MINOR.[0-9]" include/version.h | cut -d ' ' -f 3)
-SLASH_PATCH = $(shell egrep "SLASH_PATCH.[0-9]" include/version.h | cut -d ' ' -f 3)
+SLASH_MAJOR = $(shell egrep "SLASH_MAJOR.[0-9]" src/build_version.h | cut -d ' ' -f 3)
+SLASH_MINOR = $(shell egrep "SLASH_MINOR.[0-9]" src/build_version.h | cut -d ' ' -f 3)
+SLASH_PATCH = $(shell egrep "SLASH_PATCH.[0-9]" src/build_version.h | cut -d ' ' -f 3)
 
 #-----------------------------------------------
 # Create platform independent shared libraries.
@@ -194,7 +190,7 @@ TESTS = slash_string_test slash_binlog_test slash_coding_test base_conf_test \
 
 EXAMPLES = conf_example cond_lock_example binlog_example mutex_example hash_example
 
-.PHONY: clean tags dbg static_lib shared_lib all check example
+.PHONY: clean dbg static_lib shared_lib all check example
 
 all: $(LIBRARY)
 
@@ -245,7 +241,6 @@ slash_env_test: ./tests/slash_env_test.o $(TEST_MAIN) $(LIBOBJECTS)
 # examples
 
 conf_example: examples/conf_example.o $(LIBOBJECTS)
-	$(warning $(AM_LINK))
 	$(AM_LINK)
 
 cond_lock_example: examples/cond_lock_example.o $(LIBOBJECTS)
