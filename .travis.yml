@@ -15,4 +15,5 @@ notifications:
 
 script:
   - make -C slash
+  - make -C slash example
   - make -C slash check
