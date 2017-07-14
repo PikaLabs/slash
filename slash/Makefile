@@ -40,6 +40,7 @@ OPT += -momit-leaf-frame-pointer
 endif
 else
 $(warning Warning: Compiling in debug mode. Don't use the resulting binary in production)
+OPT += -D__XDEBUG__ -D_GNU_SOURCE
 endif
 
 #-----------------------------------------------
@@ -140,9 +141,9 @@ LIBOUTPUT = ./lib
 dummy := $(shell mkdir -p $(LIBOUTPUT))
 LIBRARY = $(LIBOUTPUT)/${LIBNAME}.a
 
-SLASH_MAJOR = $(shell egrep "SLASH_MAJOR.[0-9]" src/build_version.h | cut -d ' ' -f 3)
-SLASH_MINOR = $(shell egrep "SLASH_MINOR.[0-9]" src/build_version.h | cut -d ' ' -f 3)
-SLASH_PATCH = $(shell egrep "SLASH_PATCH.[0-9]" src/build_version.h | cut -d ' ' -f 3)
+SLASH_MAJOR = $(shell egrep "SLASH_MAJOR.[0-9]" include/version.h | cut -d ' ' -f 3)
+SLASH_MINOR = $(shell egrep "SLASH_MINOR.[0-9]" include/version.h | cut -d ' ' -f 3)
+SLASH_PATCH = $(shell egrep "SLASH_PATCH.[0-9]" include/version.h | cut -d ' ' -f 3)
 
 #-----------------------------------------------
 # Create platform independent shared libraries.
