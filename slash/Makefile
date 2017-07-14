@@ -9,7 +9,7 @@ OPT=
 DEBUG_LEVEL?=0
 
 ifeq ($(MAKECMDGOALS),dbg)
-  DEBUG_LEVEL=1
+  DEBUG_LEVEL=2 # compatible with rocksdb
 endif
 
 ifeq ($(MAKECMDGOALS),all)
@@ -218,6 +218,12 @@ clean:
 	rm -rf $(LIBOUTPUT)
 	find . -name "*.[oda]" -exec rm -f {} \;
 	find . -type f -regex ".*\.\(\(gcda\)\|\(gcno\)\)" -exec rm {} \;
+
+.cc.o:
+	$(AM_V_CC)$(CXX) $(CXXFLAGS) -c $< -o $@ $(COVERAGEFLAGS)
+
+.c.o:
+	$(AM_V_CC)$(CC) $(CFLAGS) -c $< -o $@
 
 # tests
 
