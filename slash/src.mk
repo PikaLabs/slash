@@ -13,11 +13,3 @@ LIB_SOURCES = \
 	src/slash_testharness.cc \
 	src/testutil.cc \
 	src/build_version.cc \
-
-EXAMPLE_SOURCE = \
-	examples/binlog_example.cc \
-	examples/cond_lock_example.cc \
-	examples/conf_example.cc \
-	examples/hash_example.cc \
-	examples/mutex_example.cc \
-

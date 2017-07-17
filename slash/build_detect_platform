@@ -48,7 +48,6 @@ if test -z "$TARGET_ARCHITECTURE"; then
 fi
 
 COMMON_FLAGS="$COMMON_FLAGS ${CFLAGS}"
-CROSS_COMPILE=
 PLATFORM_CCFLAGS=
 PLATFORM_LDFLAGS="$PLATFORM_LDFLAGS"
 PLATFORM_SHARED_EXT="so"
@@ -91,13 +90,6 @@ case "$TARGET_OS" in
         PLATFORM_LDFLAGS="$PLATFORM_LDFLAGS -lpthread -lrt"
         # PORT_FILES=port/linux/linux_specific.cc
         ;;
-    OS_ANDROID_CROSSCOMPILE)
-        PLATFORM=OS_ANDROID
-	COMMON_FLAGS="$COMMON_FLAGS -fno-builtin-memcmp -D_REENTRANT -DOS_ANDROID "
-	PLATFORM_LDFLAGS="$PLATFORM_LDFLAGS "  # All pthread features are in the Android C library
-        # PORT_FILES=port/android/android.cc
-        CROSS_COMPILE=true
-        ;;
     *)
         echo "Unknown platform!" >&2
         exit 1
@@ -105,47 +97,14 @@ esac
 
 PLATFORM_CXXFLAGS="$PLATFORM_CXXFLAGS ${CXXFLAGS}"
 
-if [ "$CROSS_COMPILE" = "true" ]; then
-    # Cross-compiling; do not try any compilation tests.
-    # Also don't need any compilation tests if compiling on fbcode
-    true
-else
-    if ! test $ROCKSUTIL_DISABLE_FALLOCATE; then
-        # Test whether fallocate is available
-        $CXX $CFLAGS -x c++ - -o /dev/null 2>/dev/null  <<EOF
-          #include <fcntl.h>
-          #include <linux/falloc.h>
-          int main() {
-      int fd = open("/dev/null", 0);
-      fallocate(fd, FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE, 0, 1024);
-          }
+# Test if -pg is supported
+$CXX $CFLAGS -pg -x c++ - -o /dev/null 2>/dev/null  <<EOF
+  int main() {
+    return 0;
+  }
 EOF
-        if [ "$?" = 0 ]; then
-            COMMON_FLAGS="$COMMON_FLAGS -DROCKSUTIL_FALLOCATE_PRESENT"
-        fi
-    fi
-
-    # Test whether PTHREAD_MUTEX_ADAPTIVE_NP mutex type is available
-    $CXX $CFLAGS -x c++ - -o /dev/null 2>/dev/null  <<EOF
-      #include <pthread.h>
-      int main() {
-        int x = PTHREAD_MUTEX_ADAPTIVE_NP;
-        return 0;
-      }
-EOF
-    if [ "$?" = 0 ]; then
-        COMMON_FLAGS="$COMMON_FLAGS -DROCKSUTIL_PTHREAD_ADAPTIVE_MUTEX"
-    fi
-
-    # Test if -pg is supported
-    $CXX $CFLAGS -pg -x c++ - -o /dev/null 2>/dev/null  <<EOF
-      int main() {
-        return 0;
-      }
-EOF
-    if [ "$?" = 0 ]; then
-        PROFILING_FLAGS=-pg
-    fi
+if [ "$?" = 0 ]; then
+    PROFILING_FLAGS=-pg
 fi
 
 # TODO(tec): Fix -Wshorten-64-to-32 errors on FreeBSD and enable the warning.
