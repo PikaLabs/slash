@@ -28,7 +28,6 @@
 *.app
 
 tags
-*.test
 lib/
 slash/src/build_version.cc
 
@@ -37,7 +36,6 @@ binlog_example
 cond_lock_example
 conf_example
 hash_example
-make_config.mk
 mutex_example
 
 # tests
