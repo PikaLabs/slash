@@ -1,6 +1,6 @@
 CXX=g++
-LDFLAGS= -lpthread -lrt $(EXTRA_LDFLAGS)
-CXXFLAGS= -O2 -std=c++11 -DOS_LINUX -fno-builtin-memcmp -msse -msse4.2 ${EXTRA_CXXFLAGS}
+LDFLAGS= -lpthread -lrt
+CXXFLAGS= -O2 -std=c++11 -fno-builtin-memcmp -msse -msse4.2
 
 .PHONY: clean libslash
 
@@ -24,7 +24,7 @@ hash_example: libslash hash_example.cc
 	$(CXX) $(CXXFLAGS) $@.cc -o$@ ../lib/libslash.a $(LDFLAGS)
 
 clean:
-	find . -name "*.[oda]" -exec rm -f {} \;
+	find . -name "*.[oda]*" -exec rm -f {} \;
 	rm -rf ./conf_example ./cond_lock_example ./binlog_example ./mutex_example ./hash_example
 
 libslash:
