@@ -14,7 +14,7 @@
 
 namespace slash {
 
-static const int kConfItemLen = 1024;
+static const int kConfItemLen = 1024*1024;
 
 struct BaseConf::Rep {
   std::string path;
