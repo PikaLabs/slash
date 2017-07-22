@@ -6,9 +6,9 @@
 
 #include "slash/include/env.h"
 #include "slash/include/testutil.h"
+#include "slash/include/slash_testharness.h"
 #include "slash/include/slash_binlog.h"
 #include "slash/src/slash_binlog_impl.h"
-#include "slash/tests/testharness.h"
 
 namespace slash {
 
@@ -92,7 +92,3 @@ TEST(BinlogTest, ProducerStatusOp) {
 }
 
 }  // namespace slash
-
-int main() {
-  return slash::test::RunAllTests();
-}

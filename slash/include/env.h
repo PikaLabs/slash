@@ -41,7 +41,7 @@ uint64_t Du(const std::string& path);
  * Whether the file is exist
  * If exist return true, else return false
  */
-int FileExists(const std::string& path);
+bool FileExists(const std::string& path);
 
 Status DeleteFile(const std::string& fname);
 

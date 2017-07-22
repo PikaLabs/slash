@@ -9,7 +9,7 @@
 #include "slash/include/env.h"
 #include "slash/include/base_conf.h"
 #include "slash/include/testutil.h"
-#include "slash/tests/testharness.h"
+#include "slash/include/slash_testharness.h"
 
 
 namespace slash {
@@ -80,7 +80,3 @@ TEST(BaseConfTest, WriteReadConf) {
 }
 
 }  // namespace slash
-
-int main() {
-  return slash::test::RunAllTests();
-}
