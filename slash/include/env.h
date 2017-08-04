@@ -24,7 +24,7 @@ int SetMaxFileDescriptorNum(int64_t max_file_descriptor_num);
  */
 void SetMmapBoundSize(size_t size);
 
-static const size_t kPageSize = getpagesize();
+extern const size_t kPageSize;
 
 
 /*

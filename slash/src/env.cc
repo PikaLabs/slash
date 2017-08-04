@@ -25,6 +25,8 @@ namespace slash {
  * -1: set failed.
  * -2: get resource limits failed.
  */
+const size_t kPageSize = getpagesize();
+
 int SetMaxFileDescriptorNum(int64_t max_file_descriptor_num) {
   // Try to Set the number of file descriptor
   struct  rlimit limit;
