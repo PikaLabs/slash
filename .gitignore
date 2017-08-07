@@ -30,6 +30,7 @@
 tags
 lib/
 slash/src/build_version.cc
+*.d
 
 # examples
 binlog_example
