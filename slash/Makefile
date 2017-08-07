@@ -1,8 +1,8 @@
 CLEAN_FILES = # deliberately empty, so we can append below.
 CXX=g++
 LDFLAGS= -lpthread -lrt
-CXXFLAGS=-std=c++11 -fno-builtin-memcmp -msse -msse4.2
-PROFILING_FLAGS=-pg
+CXXFLAGS= -g -std=c++11 -fno-builtin-memcmp -msse -msse4.2 -pipe -fPIC
+PROFILING_FLAGS= -pg
 ARFLAGS = rs
 OPT=
 
@@ -11,18 +11,6 @@ DEBUG_LEVEL?=0
 
 ifeq ($(MAKECMDGOALS),dbg)
   DEBUG_LEVEL=2 # compatible with rocksdb
-endif
-
-ifeq ($(MAKECMDGOALS),all)
-  DEBUG_LEVEL=0
-endif
-
-ifeq ($(MAKECMDGOALS),clean)
-  DEBUG_LEVEL=0
-endif
-
-ifeq ($(MAKECMDGOALS),static_lib)
-  DEBUG_LEVEL=0
 endif
 
 # compile with -O2 if for release
@@ -69,8 +57,6 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 =
 
 AM_LINK = $(AM_V_LD)$(CXX) $^ $(EXEC_LDFLAGS) -o $@ $(LDFLAGS)
-
-CXXFLAGS += -g
 
 # This (the first rule) must depend on "all".
 default: all
@@ -149,12 +135,14 @@ $(LIBRARY): $(LIBOBJECTS)
 	sed 's,\($(notdir $*)\)\.o[ :]*,$(SRC_DIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
--include $(LIBOBJECTS:.o=.d)
+ifneq ($(MAKECMDGOALS),clean)
+  -include $(LIBOBJECTS:.o=.d)
+endif
 
 clean:
 	make -C ./examples clean
 	rm -f $(TESTS) $(EXAMPLES)
-	rm -f $(LIBRARY) $(SHARED)
+	rm -f $(LIBRARY)
 	rm -rf $(CLEAN_FILES)
 	rm -rf $(LIBOUTPUT)
 	find . -name "*.[oda]*" -exec rm -f {} \;
