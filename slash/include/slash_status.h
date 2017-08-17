@@ -79,7 +79,7 @@ class Status {
   // Returns true if the status is Incomplete 
   bool IsIncomplete() const { return code() == kIncomplete; }
 
-  // Returns true iff the status is InvalidArgument 
+  // Returns true if the status is InvalidArgument 
   bool IsInvalidArgument() const { return code() == kInvalidArgument; }
   
   // Returns true if the status is Timeout
