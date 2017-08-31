@@ -68,7 +68,7 @@ static Status IOError(const std::string& context, int err_number) {
 int CreateDir(const std::string& path) {
   int res = 0;
 
-  if (mkdir(path.c_str(), 0755) != 0) {
+  if ((res = mkdir(path.c_str(), 0755)) != 0) {
     log_warn("mkdir error is %s", strerror(errno));
   }
   return res;
