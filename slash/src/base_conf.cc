@@ -40,7 +40,7 @@ struct BaseConf::Rep {
     {}
   };
 
-  Rep(const std::string &p)
+  explicit Rep(const std::string &p)
     : path(p) {
     }
   std::vector<ConfItem> item;
@@ -262,7 +262,7 @@ bool BaseConf::SetConfBool(const std::string &name, const bool value) {
 
 bool BaseConf::SetConfStrVec(const std::string& name, const std::vector<std::string> &value) {
   std::string value_str = StringConcat(value, COMMA);
-  return SetConfStr(name, value_str); 
+  return SetConfStr(name, value_str);
 }
 
 void BaseConf::DumpConf() const {

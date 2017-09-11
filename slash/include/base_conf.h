@@ -3,10 +3,11 @@
 // LICENSE file in the root directory of this source tree. An additional grant
 // of patent rights can be found in the PATENTS file in the same directory.
 
-#ifndef INCLUDE_BASE_CONF_H_
-#define INCLUDE_BASE_CONF_H_
-#include "stdlib.h"
-#include "stdio.h"
+#ifndef SLASH_INCLUDE_BASE_CONF_H_
+#define SLASH_INCLUDE_BASE_CONF_H_
+
+#include <stdlib.h>
+#include <stdio.h>
 
 #include <string>
 #include <vector>
@@ -15,15 +16,15 @@
 
 namespace slash {
 
-class BaseConf
-{
-public:
+class BaseConf {
+ public:
   explicit BaseConf(const std::string &path);
   virtual ~BaseConf();
 
   int LoadConf();
   int32_t ReloadConf();
 
+  // return false if the item dosen't exist
   bool GetConfInt(const std::string &name, int* value) const;
   bool GetConfInt64(const std::string &name, int64_t* value) const;
 
@@ -42,8 +43,7 @@ public:
   bool WriteBack();
   void WriteSampleConf() const;
 
-private:
-
+ private:
   struct Rep;
   Rep* rep_;
 
@@ -56,4 +56,4 @@ private:
 
 }  // namespace slash
 
-#endif  // INCLUDE_BASE_CONF_H_
+#endif  // SLASH_INCLUDE_BASE_CONF_H_
