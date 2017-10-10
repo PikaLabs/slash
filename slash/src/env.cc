@@ -445,7 +445,7 @@ class PosixMmapFile : public WritableFile
 
   bool MapNewRegion() {
     assert(base_ == NULL);
-    if (ftruncate(fd_, file_offset_ + map_size_) < 0) {
+    if (posix_fallocate(fd_, file_offset_, map_size_) != 0) {
       log_warn("ftruncate error");
       return false;
     }
@@ -607,7 +607,7 @@ class MmapRWFile : public RWFile
    }
 
    bool DoMapRegion() {
-     if (ftruncate(fd_, map_size_) < 0) {
+     if (posix_fallocate(fd_, 0, map_size_) != 0) {
        return false;
      }
      void* ptr = mmap(NULL, map_size_, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, 0);
