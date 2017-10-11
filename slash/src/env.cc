@@ -339,8 +339,12 @@ class PosixSequentialFile: public SequentialFile {
 
   PosixSequentialFile(const std::string& fname, FILE* f)
       : filename_(fname), file_(f) { setbuf(file_, NULL); }
-  //virtual ~PosixSequentialFile() { }
-  virtual ~PosixSequentialFile() { fclose(file_); }
+
+  virtual ~PosixSequentialFile() {
+    if (file_) {
+      fclose(file_);
+    }
+  }
 
   virtual Status Read(size_t n, Slice* result, char* scratch) override {
     Status s;
