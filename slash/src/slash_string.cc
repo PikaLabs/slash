@@ -613,7 +613,7 @@ bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port) {
 }
 
 // Trim charlist
-std::string StringTrim(std::string ori, const std::string charlist) {
+std::string StringTrim(const std::string& ori, const std::string& charlist) {
   if (ori.empty())
     return ori;
 
@@ -622,7 +622,7 @@ std::string StringTrim(std::string ori, const std::string charlist) {
   while (pos < ori.size()) {
     bool meet = false;
     for (char c : charlist)
-      if (ori[pos] == c) {
+      if (ori.at(pos) == c) {
         meet = true;
         break;
       }
@@ -632,7 +632,7 @@ std::string StringTrim(std::string ori, const std::string charlist) {
   while (rpos >= 0) {
     bool meet = false;
     for (char c : charlist)
-      if (ori[rpos] == c) {
+      if (ori.at(rpos) == c) {
         meet = true;
         break;
       }

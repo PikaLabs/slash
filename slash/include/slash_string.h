@@ -55,7 +55,7 @@ std::string& StringToLower(std::string& ori);
 std::string IpPortString(const std::string& ip, int port);
 std::string ToRead(const std::string& str);
 bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port);
-std::string StringTrim(std::string ori, const std::string charlist = " ");
+std::string StringTrim(const std::string& ori, const std::string& charlist = " ");
 
 
 }  // namespace slash
