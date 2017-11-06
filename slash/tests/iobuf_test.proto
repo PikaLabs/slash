@@ -1,0 +1,6 @@
+package ZeroCopyNode;
+
+message Node {
+  required string ip = 1;
+  required int32 port = 2;
+}

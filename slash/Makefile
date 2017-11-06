@@ -121,7 +121,7 @@ example: $(LIBRARY) $(EXAMPLES)
 check: $(LIBRARY) $(TESTS)
 	for t in $(notdir $(TESTS)); do echo "***** Running $$t"; ./$$t || exit 1; done
 
-dbg: $(LIBRARY) $(EXAMPLES)
+dbg: $(LIBRARY)
 
 $(LIBRARY): $(LIBOBJECTS)
 	$(AM_V_AR)rm -f $@
@@ -166,6 +166,9 @@ slash_coding_test: tests/slash_coding_test.o $(TEST_MAIN) $(LIBOBJECTS)
 
 slash_env_test: tests/slash_env_test.o $(TEST_MAIN) $(LIBOBJECTS)
 	$(AM_LINK)
+
+iobuf_test: tests/iobuf_test.o tests/iobuf_test.pb.cc $(TEST_MAIN) $(LIBOBJECTS)
+	$(AM_LINK) -lprotobuf
 
 # examples
 

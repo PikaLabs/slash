@@ -11,7 +11,6 @@
 #include "slash/include/testutil.h"
 #include "slash/include/slash_testharness.h"
 
-
 namespace slash {
 
 class BaseConfTest {
