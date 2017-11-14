@@ -17,21 +17,17 @@ namespace slash {
 class IOBufTest {
 };
 
-#if 1
 TEST(IOBufTest, AppendTest) {
   IOBuf buf;
   std::string fuck = "fuck";
   const char* hello = "hello1111111111111111111111111111111111111111";
   buf.Append(fuck);
   buf.Append(hello, strlen(hello));
-  printf("view count: %lu, block count: %lu\n",
-         buf.block_count(), g_block_pool.BlockCount());
+  printf("block count: %lu\n", g_block_pool.BlockCount());
   printf("content: %s\nlength: %lu\n",
          buf.ToString().c_str(), buf.length());
 }
-#endif
 
-#if 1
 TEST(IOBufTest, ZeroCopyTest) {
   ZeroCopyNode::Node node;
   node.set_ip("192.168.1.1");
@@ -40,8 +36,7 @@ TEST(IOBufTest, ZeroCopyTest) {
   IOBufZeroCopyOutputStream output(&buf);
   node.SerializeToZeroCopyStream(&output);
 
-  printf("view count: %lu, block count: %lu\n",
-         buf.block_count(), g_block_pool.BlockCount());
+  printf("block count: %lu\n", g_block_pool.BlockCount());
   printf("length: %lu\n", buf.length());
 
   ZeroCopyNode::Node node1;
@@ -50,6 +45,18 @@ TEST(IOBufTest, ZeroCopyTest) {
   node1.ParseFromZeroCopyStream(&input);
   printf("ip: %s, port: %d\n", node1.ip().c_str(), node1.port());
 }
-#endif
+
+TEST(IOBufTest, ChangeSize) {
+  IOBuf buf;
+  std::string test_str("hello 12345678901234567890");
+  buf.Append(test_str);
+  buf.TrimStart(6);
+  ASSERT_EQ(test_str.substr(6), buf.ToString());
+  printf("str:%s\n", buf.ToString().c_str());
+
+  IOBuf buf1 = buf.CopyN(10);
+  ASSERT_EQ(buf.ToString(), test_str.substr(10));
+  ASSERT_EQ(buf1.ToString(), test_str.substr(0, 10));
+}
 
 }  // namespace slash

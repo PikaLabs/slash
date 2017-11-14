@@ -49,11 +49,15 @@ class IOBuf {
     return Append(data.data(), data.size());
   }
 
-  size_t length();
-  size_t block_count() {
-    return block_view_count_;
-  }
+  ssize_t AppendFromFd(int fd);
+  ssize_t WriteIntoFd(int fd);
 
+  void TrimStart(size_t n);
+
+  IOBuf CopyN(size_t n);
+  void CutInto(void* buf, size_t n);
+
+  size_t length();
   std::string ToString();
 
  private:
@@ -87,7 +91,6 @@ class IOBufBlockPool {
 
 extern IOBufBlockPool g_block_pool;
 
-#if 1
 class IOBufZeroCopyOutputStream
     : public google::protobuf::io::ZeroCopyOutputStream {
  public:
@@ -101,9 +104,7 @@ class IOBufZeroCopyOutputStream
  private:
   IOBuf* buf_;
 };
-#endif
 
-#if 1
 class IOBufZeroCopyInputStream
     : public google::protobuf::io::ZeroCopyInputStream {
  public:
@@ -120,7 +121,6 @@ class IOBufZeroCopyInputStream
   IOBuf::BlockView* cur_view_;
   size_t pos_in_view_;
 };
-#endif
 
 }  // namespace slash
 

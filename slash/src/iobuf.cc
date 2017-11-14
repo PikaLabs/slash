@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/uio.h>
 
 #include "slash/include/likely.h"
 #include "slash/include/iobuf.h"
@@ -23,8 +25,7 @@ struct IOBuf::Block {
     : buffer_(nullptr),
       capacity_(0),
       size_(0),
-      ref_count_(1),
-      next_(nullptr) {
+      ref_count_(1) {
     if (block_size != 0) {
       size_t min_alloc_size = (block_size + 7) & ~7;  // align 8 byte
 
@@ -33,9 +34,7 @@ struct IOBuf::Block {
     }
   }
 
-  void inc_ref() {
-    ref_count_.fetch_add(1, std::memory_order_acq_rel);
-  }
+  void inc_ref() { ref_count_.fetch_add(1, std::memory_order_acq_rel); }
 
   void dec_ref() {
     int new_ref = ref_count_.fetch_sub(1, std::memory_order_acq_rel);
@@ -49,21 +48,11 @@ struct IOBuf::Block {
     delete this;
   }
 
-  bool is_full() {
-    return size_ >= capacity_;
-  }
-
-  const char* data() {
-    return buffer_;
-  }
-
-  char* writable_pos() {
-    return buffer_ + size_;
-  }
-
-  void append(size_t n) {
-    size_ += n;
-  }
+  bool is_full() { return size_ >= capacity_; }
+  bool empty() { return size_ == 0; }
+  const char* data() { return buffer_; }
+  char* writable_pos() { return buffer_ + size_; }
+  void append(size_t n) { size_ += n; }
 
   size_t remain_buf() {
     assert(capacity_ == 0 || capacity_ >= size_);
@@ -74,7 +63,6 @@ struct IOBuf::Block {
   size_t capacity_;
   size_t size_;
   std::atomic<int> ref_count_;
-  Block* next_;
 };
 
 IOBuf::IOBuf() : view_head_(0, 0, nullptr), block_view_count_(0) {}
@@ -100,6 +88,84 @@ void IOBuf::Append(const char* data, size_t length) {
 
     b->append(min_sz);
     sz += min_sz;
+  }
+}
+
+ssize_t IOBuf::AppendFromFd(int fd) {
+  Block* b;
+  b = g_block_pool.AllocNewBlock();
+  ssize_t rn = read(fd, b->writable_pos(), b->remain_buf());
+  if (rn > 0) {
+    PushBackView(b->size_, rn, b);
+    b->append(rn);
+  } else {
+    g_block_pool.ReleaseBlock(b);
+  }
+  return rn;
+}
+
+ssize_t IOBuf::WriteIntoFd(int fd) {
+  BlockView* v = view_head_.next;
+  struct iovec vec[block_view_count_];
+  for (size_t i = 0; i < block_view_count_; i++) {
+    vec[i].iov_base = v->block->buffer_ + v->offset;
+    vec[i].iov_len = v->length;
+    v = v->next;
+  }
+  // ssize_t rn = write(fd, v->block->buffer_ + v->offset, v->length);
+  ssize_t rn = writev(fd, vec, block_view_count_);
+  if (rn > 0) {
+    TrimStart(rn);
+  }
+  return rn;
+}
+
+void IOBuf::TrimStart(size_t n) {
+  size_t rn = n;
+  BlockView* v = view_head_.next;
+  while (rn > 0) {
+    if (rn >= v->length) {
+      rn -= v->length;
+      RemoveView(v);
+    } else {
+      v->offset += rn;
+      v->length -= rn;
+      // rn = 0;
+      return;
+    }
+    v = v->next;
+  }
+}
+
+IOBuf IOBuf::CopyN(size_t n) {
+  IOBuf result;
+  size_t rn = n;
+  BlockView* v = view_head_.next;
+  while (rn > 0) {
+    size_t min_sz = std::min(rn, v->length);
+    result.PushBackView(v->offset, min_sz, v->block);
+    rn -= min_sz;
+    v = v->next;
+  }
+  return result;
+}
+
+void IOBuf::CutInto(void* buf, size_t n) {
+  size_t rn = n;
+  BlockView* v = view_head_.next;
+  while (rn > 0) {
+    size_t min_sz = std::min(rn, v->length);
+    memcpy(buf, v->block->buffer_ + v->offset, min_sz);
+    if (min_sz == v->length) {
+      rn -= min_sz;
+      RemoveView(v);
+    } else {
+      v->offset += rn;
+      v->length -= rn;
+      // rn = 0;
+      return;
+    }
+    v = v->next;
   }
 }
 
@@ -135,6 +201,7 @@ void IOBuf::PushBackView(size_t offset, size_t length, Block* b) {
 }
 
 void IOBuf::RemoveView(BlockView* v) {
+  block_view_count_--;
   v->block->dec_ref();
   g_block_pool.ReleaseBlock(v->block);
   v->prev->next = v->next;
@@ -167,6 +234,9 @@ void IOBufBlockPool::ReleaseBlock(IOBuf::Block* b) {
     block_pool_.erase(b);
     return;
   }
+  if (b->ref_count_.load(std::memory_order_acquire) == 1) {
+    b->size_ = 0;
+  }
 }
 
 void IOBufBlockPool::Debug() {
@@ -176,7 +246,6 @@ void IOBufBlockPool::Debug() {
   printf("======\n");
 }
 
-#if 1
 IOBufZeroCopyOutputStream::IOBufZeroCopyOutputStream(IOBuf* buf)
     : buf_(buf) {
 }
@@ -216,9 +285,7 @@ void IOBufZeroCopyOutputStream::BackUp(int count) {
 int64_t IOBufZeroCopyOutputStream::ByteCount() const {
   return buf_->length();
 }
-#endif
 
-#if 1
 IOBufZeroCopyInputStream::IOBufZeroCopyInputStream(IOBuf* buf)
     : buf_(buf),
       cur_view_(buf_->view_head_.next),
@@ -267,6 +334,5 @@ bool IOBufZeroCopyInputStream::Skip(int count) {
 google::protobuf::int64 IOBufZeroCopyInputStream::ByteCount() const {
   return buf_->length();
 }
-#endif
 
 }  // namespace slash
