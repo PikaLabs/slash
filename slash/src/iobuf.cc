@@ -65,24 +65,36 @@ struct IOBuf::Block {
   std::atomic<int> ref_count_;
 };
 
-IOBuf::IOBuf() : view_head_(0, 0, nullptr), block_view_count_(0) {}
+IOBuf::IOBuf() : view_head_(new BlockView(0, 0, nullptr)), block_view_count_(0) {}
+
+IOBuf::IOBuf(const IOBuf& buf) {
+  view_head_ = new BlockView(0, 0, nullptr);
+  block_view_count_ = 0;
+
+  BlockView* v = buf.view_head_->next;
+  for (size_t i = 0; i < buf.block_view_count_; i++) {
+    PushBackView(v->offset, v->length, v->block);
+    v = v->next;
+  }
+}
 
 IOBuf::~IOBuf() {
-  BlockView* bview = view_head_.next;
+  BlockView* bview = view_head_->next;
   for (size_t i = 0; i < block_view_count_; i++) {
     BlockView* next = bview->next;
     RemoveView(bview);
     bview = next;
   }
+  delete view_head_;
 }
 
-void IOBuf::Append(const char* data, size_t length) {
+void IOBuf::Append(const void* data, size_t length) {
   size_t sz = 0;
   while (sz < length) {
     Block* b = g_block_pool.AllocNewBlock();
 
     size_t min_sz = std::min(length, b->remain_buf());
-    memcpy(b->writable_pos(), data + sz, min_sz);
+    memcpy(b->writable_pos(), (char*)data + sz, min_sz);
 
     PushBackView(b->size_, min_sz, b);
 
@@ -105,7 +117,7 @@ ssize_t IOBuf::AppendFromFd(int fd) {
 }
 
 ssize_t IOBuf::WriteIntoFd(int fd) {
-  BlockView* v = view_head_.next;
+  BlockView* v = view_head_->next;
   struct iovec vec[block_view_count_];
   for (size_t i = 0; i < block_view_count_; i++) {
     vec[i].iov_base = v->block->buffer_ + v->offset;
@@ -122,7 +134,7 @@ ssize_t IOBuf::WriteIntoFd(int fd) {
 
 void IOBuf::TrimStart(size_t n) {
   size_t rn = n;
-  BlockView* v = view_head_.next;
+  BlockView* v = view_head_->next;
   while (rn > 0) {
     if (rn >= v->length) {
       rn -= v->length;
@@ -137,22 +149,40 @@ void IOBuf::TrimStart(size_t n) {
   }
 }
 
-IOBuf IOBuf::CopyN(size_t n) {
-  IOBuf result;
+void IOBuf::CopyN(IOBuf* buf, size_t n) {
   size_t rn = n;
-  BlockView* v = view_head_.next;
+  BlockView* v = view_head_->next;
   while (rn > 0) {
     size_t min_sz = std::min(rn, v->length);
-    result.PushBackView(v->offset, min_sz, v->block);
+    buf->PushBackView(v->offset, min_sz, v->block);
     rn -= min_sz;
     v = v->next;
   }
-  return result;
+}
+
+void IOBuf::CopynFrom(IOBuf* buf, size_t s, size_t n) {
+  size_t start = s;
+  size_t rn = n;
+  BlockView* v = view_head_->next;
+  for (size_t i = 0; i < block_view_count_; i++) {
+    if (start < v->length) {
+      break;
+    }
+    start -= v->length;
+    v = v->next;
+  }
+  while (rn > 0) {
+    size_t min_sz = std::min(rn, v->length - start);
+    buf->PushBackView(v->offset + start, min_sz, v->block);
+    rn -= min_sz;
+    v = v->next;
+    start = 0;
+  }
 }
 
 void IOBuf::CutInto(void* buf, size_t n) {
   size_t rn = n;
-  BlockView* v = view_head_.next;
+  BlockView* v = view_head_->next;
   while (rn > 0) {
     size_t min_sz = std::min(rn, v->length);
     memcpy(buf, v->block->buffer_ + v->offset, min_sz);
@@ -169,9 +199,22 @@ void IOBuf::CutInto(void* buf, size_t n) {
   }
 }
 
-size_t IOBuf::length() {
+char IOBuf::ByteAt(size_t index) const {
+  size_t i = index;
+  BlockView* v = view_head_->next;
+  for (size_t n = 0; n < block_view_count_; n++) {
+    if (i < v->length) {
+      return v->block->buffer_[v->offset + i];
+    }
+    i -= v->length;
+    v = v->next;
+  }
+  return 0;  // not found
+}
+
+size_t IOBuf::length() const {
   size_t total_length = 0;
-  BlockView* view = view_head_.next;
+  BlockView* view = view_head_->next;
   for (size_t i = 0; i < block_view_count_; i++) {
     total_length += view->length;
     view = view->next;
@@ -179,9 +222,9 @@ size_t IOBuf::length() {
   return total_length;
 }
 
-std::string IOBuf::ToString() {
+std::string IOBuf::ToString() const {
   std::string result;
-  BlockView* view = view_head_.next;
+  BlockView* view = view_head_->next;
   for (size_t i = 0; i < block_view_count_; i++) {
     result.append(view->block->buffer_ + view->offset, view->length);
     view = view->next;
@@ -192,7 +235,7 @@ std::string IOBuf::ToString() {
 void IOBuf::PushBackView(size_t offset, size_t length, Block* b) {
   b->inc_ref();
   BlockView* v = new BlockView(offset, length, b);
-  BlockView* rear = view_head_.prev;
+  BlockView* rear = view_head_->prev;
   v->next = rear->next;
   v->prev = rear;
   rear->next->prev = v;
@@ -201,6 +244,7 @@ void IOBuf::PushBackView(size_t offset, size_t length, Block* b) {
 }
 
 void IOBuf::RemoveView(BlockView* v) {
+  assert(block_view_count_ > 0);
   block_view_count_--;
   v->block->dec_ref();
   g_block_pool.ReleaseBlock(v->block);
@@ -253,8 +297,8 @@ IOBufZeroCopyOutputStream::IOBufZeroCopyOutputStream(IOBuf* buf)
 bool IOBufZeroCopyOutputStream::Next(void** data, int* size) {
   IOBuf::Block* b;
   if (buf_->block_view_count_ != 0 &&
-      !buf_->view_head_.prev->block->is_full()) {
-    b = buf_->view_head_.prev->block;
+      !buf_->view_head_->prev->block->is_full()) {
+    b = buf_->view_head_->prev->block;
   } else {
     b = g_block_pool.AllocNewBlock();
     if (UNLIKELY(!b)) {
@@ -271,11 +315,11 @@ bool IOBufZeroCopyOutputStream::Next(void** data, int* size) {
 
 void IOBufZeroCopyOutputStream::BackUp(int count) {
   size_t rc = count;
-  IOBuf::BlockView* cur_view  = buf_->view_head_.prev;
+  BlockView* cur_view  = buf_->view_head_->prev;
   while (buf_->block_view_count_ > 0 &&
          rc > cur_view->length) {
     rc -= cur_view->length;
-    IOBuf::BlockView* prev = cur_view->prev;
+    BlockView* prev = cur_view->prev;
     buf_->RemoveView(cur_view);
     cur_view = prev;
   }
@@ -288,14 +332,14 @@ int64_t IOBufZeroCopyOutputStream::ByteCount() const {
 
 IOBufZeroCopyInputStream::IOBufZeroCopyInputStream(IOBuf* buf)
     : buf_(buf),
-      cur_view_(buf_->view_head_.next),
+      cur_view_(buf_->view_head_->next),
       pos_in_view_(0) {
 }
 
 bool IOBufZeroCopyInputStream::Next(const void** data, int* size) {
   // Switch to next view
   if (pos_in_view_ == cur_view_->length) {
-    if (cur_view_->next == &buf_->view_head_) {
+    if (cur_view_->next == buf_->view_head_) {
       return false;  // There is no more block view
     }
     cur_view_ = cur_view_->next;
@@ -320,7 +364,7 @@ void IOBufZeroCopyInputStream::BackUp(int count) {
 bool IOBufZeroCopyInputStream::Skip(int count) {
   size_t rc = count;
   while (pos_in_view_ + rc > cur_view_->length) {
-    if (cur_view_->next == &buf_->view_head_) {
+    if (cur_view_->next == buf_->view_head_) {
       return false;  // There is no more block view
     }
     rc -= cur_view_->length - pos_in_view_;

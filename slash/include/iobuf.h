@@ -18,30 +18,20 @@
 
 namespace slash {
 
+class BlockView;
+
 class IOBuf {
  public:
   IOBuf();
+  IOBuf(const IOBuf& buf);
   ~IOBuf();
 
   struct Block;  // Basic unit of IOBuf
 
-  struct BlockView {  // For IOBuf user
-    BlockView(size_t o, size_t l, Block* b)
-        : offset(o),
-          length(l),
-          block(b),
-          next(this),
-          prev(this) {
-    }
-    size_t offset;
-    size_t length;
-    Block* block;
-
-    BlockView* next;
-    BlockView* prev;
-  };
-
-  void Append(const char* data, size_t length);
+  void Append(const void* data, size_t length);
+  void Append(const char* data) {
+    return Append(data, strlen(data));
+  }
   void Append(const std::string& data) {
     return Append(data.data(), data.length());
   }
@@ -54,11 +44,14 @@ class IOBuf {
 
   void TrimStart(size_t n);
 
-  IOBuf CopyN(size_t n);
+  void CopyN(IOBuf* buf, size_t n);
+  void CopynFrom(IOBuf* buf, size_t start, size_t n);
   void CutInto(void* buf, size_t n);
 
-  size_t length();
-  std::string ToString();
+  char ByteAt(size_t index) const;
+
+  size_t length() const;
+  std::string ToString() const;
 
  private:
   friend class IOBufZeroCopyOutputStream;
@@ -67,7 +60,7 @@ class IOBuf {
   void PushBackView(size_t offset, size_t length, Block* b);
   void RemoveView(BlockView* view);
 
-  BlockView view_head_;
+  BlockView* view_head_;
   size_t block_view_count_;
 };
 
@@ -118,8 +111,24 @@ class IOBufZeroCopyInputStream
 
  private:
   IOBuf* buf_;
-  IOBuf::BlockView* cur_view_;
+  BlockView* cur_view_;
   size_t pos_in_view_;
+};
+
+struct BlockView {  // For IOBuf user
+  BlockView(size_t o, size_t l, IOBuf::Block* b)
+    : offset(o),
+      length(l),
+      block(b),
+      next(this),
+      prev(this) {
+  }
+  size_t offset;
+  size_t length;
+  IOBuf::Block* block;
+
+  BlockView* next;
+  BlockView* prev;
 };
 
 }  // namespace slash
