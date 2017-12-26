@@ -79,7 +79,7 @@ int StopRsync(const std::string& raw_path) {
   }
 
   // Kill Rsync
-  std::string rsync_stop_cmd = "kill -9 `cat " + pid_file + "`";
+  std::string rsync_stop_cmd = "kill -- -$(ps -o pgid= `cat " + pid_file + "`)";
   int ret = system(rsync_stop_cmd.c_str());
   if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
     log_info("Stop rsync success!");
