@@ -79,7 +79,29 @@ int StopRsync(const std::string& raw_path) {
   }
 
   // Kill Rsync
-  std::string rsync_stop_cmd = "kill -- -$(ps -o pgid= `cat " + pid_file + "`)";
+  SequentialFile *sequential_file;
+  if (!NewSequentialFile(pid_file, &sequential_file).ok()) {
+    log_warn("no rsync pid file found");
+    return 0;
+  };
+
+  char line[32];
+  if (sequential_file->ReadLine(line, 32) == NULL) {
+    log_warn("read rsync pid file err");
+    delete sequential_file;
+    return 0;
+  };
+
+  delete sequential_file;
+  
+  pid_t pid = atoi(line);
+
+  if (pid <= 1) {
+    log_warn("read rsync pid err");
+    return 0;
+  }
+
+  std::string rsync_stop_cmd = "kill -- -$(ps -o pgid= " + std::to_string(pid) + ")";
   int ret = system(rsync_stop_cmd.c_str());
   if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
     log_info("Stop rsync success!");
