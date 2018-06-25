@@ -31,8 +31,11 @@ int StartRsync(const std::string& raw_path, const std::string& module, const std
     log_warn("Open rsync conf file failed!");
     return -1;
   }
-  conf_stream << "uid = root" << std::endl;
-  conf_stream << "gid = root" << std::endl;
+
+  if (geteuid() == 0) {
+    conf_stream << "uid = root" << std::endl;
+    conf_stream << "gid = root" << std::endl;
+  }
   conf_stream << "use chroot = no" << std::endl;
   conf_stream << "max connections = 10" << std::endl;
   conf_stream << "lock file = " << rsync_path + kRsyncLockFile << std::endl;
