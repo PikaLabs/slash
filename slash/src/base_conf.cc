@@ -77,7 +77,7 @@ int BaseConf::LoadConf() {
     type = Rep::kComment;
     line_len = strlen(line);
     for (int i = 0; i < line_len; i++) {
-      if (line[i] == COMMENT) {
+      if (i == 0 && line[i] == COMMENT) {
         type = Rep::kComment;
         break;
       }
