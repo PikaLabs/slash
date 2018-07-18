@@ -7,12 +7,22 @@
 
 namespace slash {
 
+void EncodeFixed16(char* buf, uint16_t value) {
+  memcpy(buf, &value, sizeof(value));
+}
+
 void EncodeFixed32(char* buf, uint32_t value) {
   memcpy(buf, &value, sizeof(value));
 }
 
 void EncodeFixed64(char* buf, uint64_t value) {
   memcpy(buf, &value, sizeof(value));
+}
+
+void PutFixed16(std::string* dst, uint16_t value) {
+  char buf[sizeof(value)];
+  EncodeFixed16(buf, value);
+  dst->append(buf, sizeof(buf));
 }
 
 void PutFixed32(std::string* dst, uint32_t value) {

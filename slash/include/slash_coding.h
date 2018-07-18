@@ -19,12 +19,14 @@
 namespace slash {
 
 // Standard Put... routines append to a string
+extern void PutFixed16(std::string* dst, uint16_t value);
 extern void PutFixed32(std::string* dst, uint32_t value);
 extern void PutFixed64(std::string* dst, uint64_t value);
 extern void PutVarint32(std::string* dst, uint32_t value);
 extern void PutVarint64(std::string* dst, uint64_t value);
 extern void PutLengthPrefixedString(std::string* dst, const std::string& value);
 
+extern void GetFixed16(std::string* dst, uint16_t* value);
 extern void GetFixed32(std::string* dst, uint32_t* value);
 extern void GetFixed64(std::string* dst, uint64_t* value);
 extern bool GetVarint32(std::string* input, uint32_t* value);
@@ -46,6 +48,7 @@ extern int VarintLength(uint64_t v);
 
 // Lower-level versions of Put... that write directly into a character buffer
 // REQUIRES: dst has enough space for the value being written
+extern void EncodeFixed16(char* dst, uint16_t value);
 extern void EncodeFixed32(char* dst, uint32_t value);
 extern void EncodeFixed64(char* dst, uint64_t value);
 
@@ -57,6 +60,13 @@ extern char* EncodeVarint64(char* dst, uint64_t value);
 
 // Lower-level versions of Get... that read directly from a character buffer
 // without any bounds checking.
+
+inline uint16_t DecodeFixed16(const char* ptr) {
+    // Load the raw bytes
+    uint16_t result;
+    memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
+    return result;
+}
 
 inline uint32_t DecodeFixed32(const char* ptr) {
     // Load the raw bytes
@@ -70,6 +80,11 @@ inline uint64_t DecodeFixed64(const char* ptr) {
     uint64_t result;
     memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
     return result;
+}
+
+inline void GetFixed16(std::string* dst, uint16_t *value) {
+  *value = DecodeFixed16(dst->data());
+  dst->erase(0, sizeof(uint16_t));
 }
 
 inline void GetFixed32(std::string* dst, uint32_t *value) {
