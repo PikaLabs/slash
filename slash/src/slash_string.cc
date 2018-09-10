@@ -538,6 +538,11 @@ std::string& StringToLower(std::string& ori) {
   return ori;
 }
 
+std::string& StringToUpper(std::string& ori) {
+  std::transform(ori.begin(), ori.end(), ori.begin(), ::toupper);
+  return ori;
+}
+
 std::string IpPortString(const std::string& ip, int port) {
   if (ip.empty()) {
     return std::string();
