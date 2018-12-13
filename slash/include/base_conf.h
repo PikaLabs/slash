@@ -71,6 +71,8 @@ class BaseConf {
   bool SetConfBool(const std::string &name, const bool value);
   bool SetConfStrVec(const std::string &name, const std::vector<std::string> &value);
 
+  bool CheckConfExist(const std::string &name) const;
+
   void DumpConf() const;
   bool WriteBack();
   void WriteSampleConf() const;

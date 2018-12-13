@@ -235,6 +235,18 @@ bool BaseConf::SetConfStrVec(const std::string& name, const std::vector<std::str
   return SetConfStr(name, value_str);
 }
 
+bool BaseConf::CheckConfExist(const std::string& name) const {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
+    if (rep_->item[i].type == Rep::kComment) {
+      continue;
+    }
+    if (name == rep_->item[i].name) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void BaseConf::DumpConf() const {
   int cnt = 1;
   for (size_t i = 0; i < rep_->item.size(); i++) {
