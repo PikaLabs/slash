@@ -16,36 +16,6 @@ namespace slash {
 
 static const int kConfItemLen = 1024*1024;
 
-struct BaseConf::Rep {
-  std::string path;
-  enum ConfType {
-    kConf = 0,
-
-    kComment = 1,
-  };
-
-  struct ConfItem {
-    ConfType type; // 0 means conf, 1 means comment
-    std::string name;
-    std::string value;
-    ConfItem(ConfType t, const std::string &v) :
-      type(t),
-      name(""),
-      value(v)
-    {}
-    ConfItem(ConfType t, const std::string &n, const std::string &v) :
-      type(t),
-      name(n),
-      value(v)
-    {}
-  };
-
-  explicit Rep(const std::string &p)
-    : path(p) {
-    }
-  std::vector<ConfItem> item;
-};
-
 BaseConf::BaseConf(const std::string &path)
   : rep_(new Rep(path)) {
 }
@@ -309,6 +279,10 @@ void BaseConf::WriteSampleConf() const {
   }
   delete write_file;
   return;
+}
+
+void BaseConf::PushConfItem(const Rep::ConfItem& item) {
+  rep_->item.push_back(item);
 }
 
 }   // namespace slash

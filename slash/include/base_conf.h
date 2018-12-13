@@ -16,8 +16,40 @@
 
 namespace slash {
 
+class BaseConf;
+
+
 class BaseConf {
  public:
+  struct Rep {
+    std::string path;
+    enum ConfType {
+      kConf = 0,
+      kComment = 1,
+    };
+
+    struct ConfItem {
+      ConfType type; // 0 means conf, 1 means comment
+      std::string name;
+      std::string value;
+      ConfItem(ConfType t, const std::string &v) :
+        type(t),
+        name(""),
+        value(v)
+      {}
+      ConfItem(ConfType t, const std::string &n, const std::string &v) :
+        type(t),
+        name(n),
+        value(v)
+      {}
+    };
+
+    explicit Rep(const std::string &p)
+      : path(p) {
+    }
+    std::vector<ConfItem> item;
+  };
+
   explicit BaseConf(const std::string &path);
   virtual ~BaseConf();
 
@@ -43,8 +75,9 @@ class BaseConf {
   bool WriteBack();
   void WriteSampleConf() const;
 
+  void PushConfItem(const Rep::ConfItem& item);
+
  private:
-  struct Rep;
   Rep* rep_;
 
   /*
