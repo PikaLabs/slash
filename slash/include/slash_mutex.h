@@ -33,14 +33,19 @@ class RWLock {
   RWLock(pthread_rwlock_t *mu, bool is_rwlock) :
     mu_(mu) {
       if (is_rwlock) {
-        pthread_rwlock_wrlock(this->mu_);
+        res = pthread_rwlock_wrlock(this->mu_);
       } else {
-        pthread_rwlock_rdlock(this->mu_);
+        res = pthread_rwlock_rdlock(this->mu_);
       }
     }
-  ~RWLock() { pthread_rwlock_unlock(this->mu_); }
+  ~RWLock() {
+    if (!res) {
+      pthread_rwlock_unlock(this->mu_);
+    }
+  }
 
  private:
+  int res;
   pthread_rwlock_t *const mu_;
   // No copying allowed
   RWLock(const RWLock&);
