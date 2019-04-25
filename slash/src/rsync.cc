@@ -12,9 +12,13 @@ static bool CleanRsyncInfo(const std::string& path) {
   return slash::DeleteDirIfExist(path + kRsyncSubDir);
 }
 
-int StartRsync(const std::string& raw_path, const std::string& module, const std::string& ip, const int port) {
+int StartRsync(const std::string& raw_path,
+               const std::string& module,
+               const std::string& ip,
+               const int port,
+               const std::string& passwd) {
   // Sanity check  
-  if (raw_path.empty() || module.empty()) {
+  if (raw_path.empty() || module.empty() || passwd.empty()) {
     return -1;
   }
   std::string path(raw_path);
@@ -23,6 +27,16 @@ int StartRsync(const std::string& raw_path, const std::string& module, const std
   }
   std::string rsync_path = path + kRsyncSubDir + "/";
   CreatePath(rsync_path);
+
+  // Generate secret file
+  std::string secret_file(rsync_path + kRsyncSecretFile);
+  std::ofstream secret_stream(secret_file.c_str());
+  if (!secret_stream) {
+    log_warn("Open rsync secret file failed!");
+    return -1;
+  }
+  secret_stream << kRsyncUser << ":" << passwd;
+  secret_stream.close();
 
   // Generate conf file
   std::string conf_file(rsync_path + kRsyncConfFile);
@@ -43,6 +57,8 @@ int StartRsync(const std::string& raw_path, const std::string& module, const std
   conf_stream << "pid file = " << rsync_path + kRsyncPidFile << std::endl;
   conf_stream << "list = no" << std::endl;
   conf_stream << "strict modes = no" << std::endl;
+  conf_stream << "auth users = " << kRsyncUser << std::endl;
+  conf_stream << "secrets file = " << secret_file << std::endl;
   conf_stream << "[" << module << "]" << std::endl;
   conf_stream << "path = " << path << std::endl;
   conf_stream << "read only = no" << std::endl;
@@ -115,14 +131,17 @@ int StopRsync(const std::string& raw_path) {
   return ret;
 }
 
-int RsyncSendFile(const std::string& local_file_path, const std::string& remote_file_path, const RsyncRemote& remote) {
+int RsyncSendFile(const std::string& local_file_path,
+                  const std::string& remote_file_path,
+                  const std::string& secret_file_path,
+                  const RsyncRemote& remote) {
   std::stringstream ss;
   ss << """rsync -avP --bwlimit=" << remote.kbps
+    << " --password-file=" << secret_file_path
     << " --port=" << remote.port
     << " " << local_file_path
-    << " " << remote.host
+    << " " << kRsyncUser << "@" << remote.host
     << "::" << remote.module << "/" << remote_file_path;
-
   std::string rsync_cmd = ss.str();
   int ret = system(rsync_cmd.c_str());
   if (ret == 0 || (WIFEXITED(ret) && !WEXITSTATUS(ret))) {
@@ -132,7 +151,10 @@ int RsyncSendFile(const std::string& local_file_path, const std::string& remote_
   return ret;
 }
 
-int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& remote_dir_path, const RsyncRemote& remote) {
+int RsyncSendClearTarget(const std::string& local_dir_path,
+                         const std::string& remote_dir_path,
+                         const std::string& secret_file_path,
+                         const RsyncRemote& remote) {
   if (local_dir_path.empty() || remote_dir_path.empty()) {
     return -2;
   }
@@ -145,8 +167,9 @@ int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& r
   }
   std::stringstream ss;
   ss << "rsync -avP --delete --port=" << remote.port
+    << " --password-file=" << secret_file_path
     << " " << local_dir
-    << " " << remote.host
+    << " " << kRsyncUser << "@" << remote.host
     << "::" << remote.module << "/" << remote_dir;
   std::string rsync_cmd = ss.str();
   int ret = system(rsync_cmd.c_str());
