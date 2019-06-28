@@ -38,6 +38,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <cmath>
 #include <limits.h>
 #include <unistd.h>
 #include <sys/time.h>
