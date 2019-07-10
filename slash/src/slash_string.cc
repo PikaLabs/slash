@@ -413,6 +413,22 @@ int string2l(const char *s, size_t slen, long *lval) {
     return 1;
 }
 
+/* Convert a string into a unsigned long. Returns 1 if the string could be parsed into a
+ * (non-overflowing) unsigned long, 0 otherwise. The value will be set to the parsed
+ * value when appropriate. */
+int string2ul(const char *s, size_t slen, unsigned long *lval) {
+    long long llval;
+
+    if (!string2ll(s,slen,&llval))
+        return 0;
+
+    if (llval > ULONG_MAX)
+        return 0;
+
+    *lval = (unsigned long)llval;
+    return 1;
+}
+
 /* Convert a double to a string representation. Returns the number of bytes
  * required. The representation should always be parsable by strtod(3). */
 int d2string(char *buf, size_t len, double value) {

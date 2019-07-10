@@ -46,6 +46,7 @@ long long memtoll(const char *p, int *err);
 int ll2string(char *s, size_t len, long long value);
 int string2ll(const char *s, size_t slen, long long *value);
 int string2l(const char *s, size_t slen, long *value);
+int string2ul(const char *s, size_t slen, unsigned long *value);
 int d2string(char *buf, size_t len, double value);
 int string2d(const char *buf, size_t len, double *value);
 std::vector<std::string> &StringSplit(const std::string &s,
