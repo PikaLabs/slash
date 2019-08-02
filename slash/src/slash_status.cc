@@ -72,6 +72,8 @@ std::string Status::ToString() const {
     case kAuthFailed:
       type = "AuthFailed: ";
       break;
+    case kBusy:
+      type = "Busy:";
     default:
       snprintf(tmp, sizeof(tmp), "Unknown code(%d): ",
           static_cast<int>(code()));
