@@ -55,6 +55,10 @@ class Status {
     return Status(kAuthFailed, msg, msg2);
   }
 
+  static Status Busy(const Slice& msg, const Slice& msg2 = Slice()) {
+    return Status(kBusy, msg, msg2);
+  }
+
   // Returns true if the status indicates success.
   bool ok() const { return (state_ == NULL); }
 
@@ -88,6 +92,9 @@ class Status {
   // Returns true if the status is AuthFailed
   bool IsAuthFailed() const { return code() == kAuthFailed; }
 
+  // Return true if the status is Busy
+  bool IsBusy() const { return code() == kBusy; }
+
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
   std::string ToString() const;
@@ -111,7 +118,8 @@ class Status {
     kIncomplete = 7,
     kComplete = 8,
     kTimeout = 9,
-    kAuthFailed = 10
+    kAuthFailed = 10,
+    kBusy = 11
   };
 
   Code code() const {

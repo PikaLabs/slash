@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace slash {
 
@@ -168,7 +169,9 @@ public:
   RecordMutex() {};
   ~RecordMutex();
 
+  void MultiLock(const std::vector<std::string>& keys);
   void Lock(const std::string &key);
+  void MultiUnlock(const std::vector<std::string>& keys);
   void Unlock(const std::string &key);
 
 private:
