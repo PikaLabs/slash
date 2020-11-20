@@ -153,8 +153,8 @@ void RecordMutex::Lock(const std::string &key) {
 
   if (it != records_.end()) {
     RefMutex *ref_mutex = it->second;
-    ref_mutex->Ref();
     mutex_.Unlock();
+    ref_mutex->Ref();
 
     ref_mutex->Lock();
   } else {
