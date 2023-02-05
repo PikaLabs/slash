@@ -759,7 +759,7 @@ Status NewSequentialFile(const std::string& fname, SequentialFile** result) {
 
 Status NewWritableFile(const std::string& fname, WritableFile** result) {
   Status s;
-  const int fd = open(fname.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0644);
+  const int fd = open(fname.c_str(), O_CREAT | O_RDWR | O_TRUNC | O_CLOEXEC, 0644);
   if (fd < 0) {
     *result = NULL;
     s = IOError(fname, errno);
@@ -771,7 +771,7 @@ Status NewWritableFile(const std::string& fname, WritableFile** result) {
 
 Status NewRWFile(const std::string& fname, RWFile** result) {
   Status s;
-  const int fd = open(fname.c_str(), O_CREAT | O_RDWR, 0644);
+  const int fd = open(fname.c_str(), O_CREAT | O_RDWR | O_CLOEXEC, 0644);
   if (fd < 0) {
     *result = NULL;
     s = IOError(fname, errno);
@@ -783,7 +783,7 @@ Status NewRWFile(const std::string& fname, RWFile** result) {
 
 Status AppendWritableFile(const std::string& fname, WritableFile** result, uint64_t write_len) {
   Status s;
-  const int fd = open(fname.c_str(), O_RDWR, 0644);
+  const int fd = open(fname.c_str(), O_RDWR | O_CLOEXEC, 0644);
   if (fd < 0) {
     *result = NULL;
     s = IOError(fname, errno);

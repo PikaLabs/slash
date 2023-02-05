@@ -16,36 +16,6 @@ namespace slash {
 
 static const int kConfItemLen = 1024*1024;
 
-struct BaseConf::Rep {
-  std::string path;
-  enum ConfType {
-    kConf = 0,
-
-    kComment = 1,
-  };
-
-  struct ConfItem {
-    ConfType type; // 0 means conf, 1 means comment
-    std::string name;
-    std::string value;
-    ConfItem(ConfType t, const std::string &v) :
-      type(t),
-      name(""),
-      value(v)
-    {}
-    ConfItem(ConfType t, const std::string &n, const std::string &v) :
-      type(t),
-      name(n),
-      value(v)
-    {}
-  };
-
-  explicit Rep(const std::string &p)
-    : path(p) {
-    }
-  std::vector<ConfItem> item;
-};
-
 BaseConf::BaseConf(const std::string &path)
   : rep_(new Rep(path)) {
 }
@@ -77,7 +47,7 @@ int BaseConf::LoadConf() {
     type = Rep::kComment;
     line_len = strlen(line);
     for (int i = 0; i < line_len; i++) {
-      if (line[i] == COMMENT) {
+      if (i == 0 && line[i] == COMMENT) {
         type = Rep::kComment;
         break;
       }
@@ -265,6 +235,18 @@ bool BaseConf::SetConfStrVec(const std::string& name, const std::vector<std::str
   return SetConfStr(name, value_str);
 }
 
+bool BaseConf::CheckConfExist(const std::string& name) const {
+  for (size_t i = 0; i < rep_->item.size(); i++) {
+    if (rep_->item[i].type == Rep::kComment) {
+      continue;
+    }
+    if (name == rep_->item[i].name) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void BaseConf::DumpConf() const {
   int cnt = 1;
   for (size_t i = 0; i < rep_->item.size(); i++) {
@@ -309,6 +291,10 @@ void BaseConf::WriteSampleConf() const {
   }
   delete write_file;
   return;
+}
+
+void BaseConf::PushConfItem(const Rep::ConfItem& item) {
+  rep_->item.push_back(item);
 }
 
 }   // namespace slash

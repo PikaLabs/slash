@@ -5,6 +5,8 @@
 #include <string.h>
 #include <sys/time.h>
 
+#include <algorithm>
+
 namespace slash {
 
 static void PthreadCall(const char* label, int result) {
@@ -145,7 +147,6 @@ RecordMutex::~RecordMutex() {
   }
   mutex_.Unlock();
 }
-
 
 void RecordMutex::Lock(const std::string &key) {
   mutex_.Lock();

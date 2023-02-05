@@ -46,12 +46,14 @@ long long memtoll(const char *p, int *err);
 int ll2string(char *s, size_t len, long long value);
 int string2ll(const char *s, size_t slen, long long *value);
 int string2l(const char *s, size_t slen, long *value);
+int string2ul(const char *s, size_t slen, unsigned long *value);
 int d2string(char *buf, size_t len, double value);
 int string2d(const char *buf, size_t len, double *value);
 std::vector<std::string> &StringSplit(const std::string &s,
         char delim, std::vector<std::string> &elems);
 std::string StringConcat(const std::vector<std::string> &elems, char delim);
 std::string& StringToLower(std::string& ori);
+std::string& StringToUpper(std::string& ori);
 std::string IpPortString(const std::string& ip, int port);
 std::string ToRead(const std::string& str);
 bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port);
